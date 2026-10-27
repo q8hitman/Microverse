@@ -29,8 +29,11 @@
 - **Scientific fixes:** yoghurt model 1.1.0 (peptide pool could go negative; see SCIENTIFIC_REVIEW A1);
   biosafety described per strain and jurisdiction with representative strains; drawn-cell mass from shape volume.
   The chemostat parameters were checked against the values reported for Fussmann et al. (2000).
-- **Arabic:** names for every model parameter; new screens are bilingual.
-- **Tests:** 188 (was 76), including off-screen construction of every screen.
+- **Arabic:** names for every model parameter; plot titles, curves, scan tabs, evidence legend and all scenario
+  questions; new screens are bilingual.
+- **Visiting grazers:** a ciliate from the 10× field crosses the 100× field and takes in nearby bacteria while
+  their population is falling (a labelled visual summary of grazing; not counted).
+- **Tests:** 190 (was 76), including off-screen construction of every screen.
 - Docs: DEVELOPMENT_AUDIT, VISUALIZATION_ARCHITECTURE, SCIENTIFIC_REVIEW, OVERNIGHT_PROGRESS, models/agar.
 
 ## 0.4.0 — 2026-10-27 — What each organism does; two-panel microscope; calmer interface

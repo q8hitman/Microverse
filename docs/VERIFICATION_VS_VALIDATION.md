@@ -5,7 +5,7 @@
 | Question | Does the code solve the equations we wrote down? | Do those equations describe real microbes? |
 | Evidence | Analytic solutions, conservation laws, consistency checks, reproducibility | Independent laboratory or field observations |
 | Can be automated? | Yes — `tests/` | Partly — needs real data, held out from calibration |
-| Status (v0.5) | **Done for the core, the visual rules and the comparison maths** (188 tests) | **Not done** |
+| Status (v0.5) | **Done for the core, the visual rules and the comparison maths** (190 tests) | **Not done** |
 
 ## What the M1 tests verify
 - Flux terms sum exactly to the right-hand side (explanations are consistent with the dynamics).

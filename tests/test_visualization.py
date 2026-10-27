@@ -302,3 +302,17 @@ def test_scene_update_is_fast_enough_for_30_fps():
         n += 1
     per_frame = (time.perf_counter() - t0) / n
     assert per_frame < 0.008, f"{per_frame * 1000:.1f} ms per frame"
+
+
+def test_grazers_from_the_large_field_visit_and_leave_without_being_counted():
+    lab = community_lab(("ecoli", "tetrahymena"), "custom")
+    tr = lab_run(lab)
+    scene = lab.make_scene(1)
+    assert scene.tracks[0].visitors == (1,)
+    visits, max_len = 0, 0
+    for _ in play(scene, tr, 2.0):
+        v = scene.visitor_agents("small")
+        visits += bool(v)
+        max_len = max(max_len, len(v))
+        assert sum(scene.drawn_counts()) == sum(t.pop.cells() for t in scene.tracks)   # visitors are not counted
+    assert visits > 0 and max_len == 1

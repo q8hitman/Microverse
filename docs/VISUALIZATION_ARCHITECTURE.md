@@ -125,6 +125,8 @@ grid there first.
 * Positions, paths and the exact timing of each division are illustrative. Only the **number** of drawn cells
   (× sample factor) is model output.
 * Spatial structure is not modelled (well-mixed models), so clusters seen on screen are not predictions.
-* Predation is visible only when predator and prey share a field (e.g. Paramecium eating yeast in the 10×
-  panel). Bacteria eaten by ciliates disappear in the 100× panel as lysis or loss.
+* Predation across fields is shown as a **visiting grazer**: while a small-field prey population is falling and
+  its predator (from the large field) is present, one predator swims across the 100× field (slowed to ¼ speed)
+  and nearby prey are drawn into it. The visitor is not counted and is labelled "summary of grazing" in the
+  Explanation mode. Prey far from any mouth are lost by lysis or by leaving the view instead.
 * Bacterial endospores, gas vesicles and capsules are drawn only where noted; sporulation is not modelled.

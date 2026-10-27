@@ -23,7 +23,7 @@ import numpy as np
 
 from ..core.trajectory import Trajectory
 from ..library.morphology import MorphSpec
-from .population import Agent, VisualPopulation
+from .population import ENTERING, Agent, VisualPopulation
 from .field import Field
 
 MODES = ("natural", "microscope", "explain")
@@ -45,6 +45,7 @@ class Track:
     cap: float                                  # most cells we are willing to draw for this species
     colour: str = "#9da7b3"
     predators: tuple[int, ...] = ()             # indices of tracks that eat this one (same panel)
+    visitors: tuple[int, ...] = ()              # predators that live in ANOTHER (larger) field but eat this one
     concentration: float = 1.0
     pop: VisualPopulation | None = None
     target: float = 0.0
@@ -76,6 +77,11 @@ class Specimen:
         self._traj_hash = None
         self._last_t = None
         self.selected: tuple[int, int] | None = None     # (track index, agent id) chosen for inspection
+        # Grazers from the large field that pass through a small field. They are a VISUAL SUMMARY of grazing
+        # (not counted, not part of any population): one swims across while the prey population is falling.
+        self.visitors: dict[str, list[tuple[int, Agent, VisualPopulation]]] = {}
+        import random as _random
+        self._vrng = _random.Random(seed + 99)
 
     # ------------------------------------------------------------------ public API
     @property
@@ -107,11 +113,41 @@ class Specimen:
         self.t_sim, self.y = t_sim, y
         dt = min(max(dt_real, 0.0), self.max_dt)
         targets = self.expected_counts(y)
+        self._update_visitors(dt, targets)
         for i, tr in enumerate(self.tracks):
             tr.target = targets[i]
             preds = [a for j in tr.predators for a in self.tracks[j].pop.agents if a.counted]
+            preds += [a for j, a, _pop in self.visitors.get(tr.panel, ()) if j in tr.visitors]
             tr.pop.step(tr.target, dt, advancing, self.motion_scale, preds)
         self.on_state(y, traj)
+
+    def visitor_agents(self, panel: str) -> list[tuple[int, Agent]]:
+        return [(j, a) for j, a, _p in self.visitors.get(panel, ())]
+
+    def _update_visitors(self, dt: float, targets) -> None:
+        for panel in self.panels:
+            live = []
+            for j, a, pop in self.visitors.get(panel, ()):
+                pop._move(dt * self.motion_scale * 0.25, [])        # slowed: a 300 µm/s cell crosses 75 µm
+                a.progress += dt
+                inside = -a_len(pop) <= a.x <= pop.w + a_len(pop) and -a_len(pop) <= a.y <= pop.h + a_len(pop)
+                if a.progress < 1.5 or inside:
+                    live.append((j, a, pop))
+            self.visitors[panel] = live
+        for i, tr in enumerate(self.tracks):
+            if not tr.visitors or self.visitors.get(tr.panel):
+                continue
+            falling = tr.pop.cells() > targets[i] + 0.75 and tr.pop.cells() > 0
+            hosts = [j for j in tr.visitors if self.tracks[j].pop.cells() > 0]
+            if falling and hosts and self._vrng.random() < dt * 0.8:
+                j = self._vrng.choice(hosts)
+                f = self.panels[tr.panel]
+                pop = VisualPopulation(self.tracks[j].spec, f.width_um, f.height_um, seed=self._vrng.randrange(10 ** 6))
+                pop._enter()
+                a = pop.agents[0]
+                a.state = ENTERING                                   # swims straight across
+                a.grow = 1.0
+                self.visitors[tr.panel] = [(j, a, pop)]
 
     def replay(self, traj: Trajectory, t_sim: float = 0.0) -> None:
         """Start again from a fresh sample at time t_sim (used by the Replay button)."""
@@ -160,3 +196,7 @@ class Specimen:
             if first or reseed_all or changed:
                 tr.pop.seed(min(max(tr.raw(y), 0.0) * tr.concentration, tr.cap))
         self._last_t = t_sim
+
+
+def a_len(pop: VisualPopulation) -> float:
+    return pop.spec.length_um

@@ -47,11 +47,11 @@ class CommunityScene(Specimen):
                 return max(y[j], 0.0) * vol / 1000.0 / max(m, 1e-18)
 
             tracks.append(Track(o.key, o.name, o.name_ar, spec, self.panel_of[i], raw, cap, o.colour))
-        for i, prey in enumerate(orgs):                 # who can be SEEN eating whom (same panel only)
-            tracks[i].predators = tuple(
-                j for j, q in enumerate(orgs)
-                if q.feeding == "predator" and j != i and prey.edible
-                and prey.size_um <= q.prey_size_max and self.panel_of[j] == self.panel_of[i])
+        for i, prey in enumerate(orgs):                 # who can be SEEN eating whom
+            eats = [j for j, q in enumerate(orgs)
+                    if q.feeding == "predator" and j != i and prey.edible and prey.size_um <= q.prey_size_max]
+            tracks[i].predators = tuple(j for j in eats if self.panel_of[j] == self.panel_of[i])
+            tracks[i].visitors = tuple(j for j in eats if self.panel_of[j] != self.panel_of[i])
         super().__init__(panels, tracks, seed)
         self.ph, self.o2, self.turbidity = 7.0, 8.0, 0.0
 

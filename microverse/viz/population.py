@@ -201,7 +201,8 @@ class VisualPopulation:
                     continue
                 need -= a.n
                 pred = self._nearest(a, predators) if predators else None
-                if pred is not None:
+                reach = 0.25 * min(self.w, self.h)            # only prey near a mouth can be eaten
+                if pred is not None and self._dist2(a, pred) <= reach ** 2:
                     a.state, a.prey_of = GRAZED, pred.id
                 elif s.motility not in ("none", "sessile", "hyphal") and self._near_edge(a):
                     a.state = LEAVING

@@ -140,6 +140,16 @@ class SpecimenView(QWidget):
             tr = s.tracks[i]
             for a in tr.pop.agents:
                 paint_agent(p, tr.spec, a, k, look, self.agent_extra(i, a))
+        for j, a in s.visitor_agents(name):                    # a grazer from the large field passing through
+            p.setOpacity(0.85)
+            paint_agent(p, s.tracks[j].spec, a, k, look)
+            p.setOpacity(1.0)
+            if s.mode == "explain":
+                p.setPen(QColor(240, 136, 62))
+                p.setFont(QFont("Segoe UI", 8))
+                p.drawText(QPointF(a.x * k + 8, a.y * k - 8),
+                           L(f"{s.tracks[j].label.split(' ')[0]} passing through (summary of grazing)",
+                             f"{s.tracks[j].label_ar} يمر (ملخص للرعي)"))
         if s.mode == "explain":
             self._overlays(p, name, k)
         p.restore()
@@ -168,7 +178,7 @@ class SpecimenView(QWidget):
                     p.setBrush(Qt.NoBrush)
                     p.drawEllipse(c, r, r)
                 elif a.state == GRAZED:
-                    pred = next((b for j in tr.predators for b in s.tracks[j].pop.agents if b.id == a.prey_of), None)
+                    pred = next((b for j in tr.predators for b in s.tracks[j].pop.agents if b.id == a.prey_of), None)                         or next((b for _j, b in s.visitor_agents(name) if b.id == a.prey_of), None)
                     if pred is not None:
                         p.setPen(QPen(QColor(240, 136, 62, 230), 1.4))
                         p.drawLine(c, QPointF(pred.x * k, pred.y * k))

@@ -46,8 +46,8 @@ Modified: the three scenes and three lab widgets, `workspace.py`, `main_window.p
 | Community: interaction network in Who's Who | ✅ completed |
 | Virtual Agar foundation (colony growth, morphology vs food and agar, plate counts, time-lapse, counted markers) | 🟡 foundation (qualitative, one species) |
 | Yoghurt calibration interface | ⏳ planned: no observational data set yet; calibration must create a NEW prediction |
-| Ciliates visibly eating bacteria across panels | ⏳ planned |
-| Full Arabic for plot titles, scan tab and some legends | 🟡 partial (all parameters and new screens are bilingual) |
+| Ciliates visibly eating bacteria across panels (visiting grazer) | ✅ completed (v05_visitor.png) |
+| Arabic for parameters, plot titles, curves, scan tabs, evidence legend, scenario questions | ✅ completed (units such as mg/L stay Latin) |
 
 ## 5. Bugs fixed
 1. Abrupt spawning and flicker (root cause above).
@@ -62,8 +62,8 @@ Modified: the three scenes and three lab widgets, `workspace.py`, `main_window.p
 
 ## 6. Tests run and results
 * Baseline: 76 passed.
-* Final: **188 passed** (`.venv\Scripts\python -m pytest -q`, about 65 s).
-  New: visualization 72, reality 18, agar 8, changes 4, replicates 3, UI construction 5, plus regression tests.
+* Final: **190 passed** (`.venv\Scripts\python -m pytest -q`, about 65 s).
+  New: visualization 73, reality 18, agar 8, changes 4, replicates 3, UI construction 5, plus regression tests.
 * UI smoke scripts run with screenshots: `ui_smoke.py`, `ui_smoke_v05.py`, `ui_smoke_reality.py` (scratch
   database), `ui_smoke_agar.py`, `morphology_gallery.py`.
 
@@ -107,14 +107,13 @@ thread. The target GPU is not used (QPainter is CPU), and does not need to be at
    (never touch the old one).
 4. Agar: two species on one plate; a diffusing benign inhibitor (e.g. acid from a lactic acid bacterium);
    finer grid in spot mode.
-5. Microscope: an inset showing a ciliate ingesting bacteria from the 100× panel; spatial structure only if a
-   spatial model drives it.
-6. Translate the remaining English strings in the Arabic UI (plot titles, scan tab, evidence legend).
+5. Microscope: spatial structure only if a spatial model drives it; per-species tuning after the live review.
+6. Arabic: review the translations with a native-speaking microbiologist (terminology).
 7. Open a pull request from `dev/v0.5` to `main` after review (GitHub CLI is not installed here).
 
 ## 11. Final commit
 The commit that adds this report is the last commit on `dev/v0.5`; run `git log -1 dev/v0.5` to see its hash.
-The previous commit was `31bc456`.
+Commits on the branch after the first report: Arabic display strings (`1a04bee`) and the visiting grazer.
 
 ## 12. How to run the updated application
 ```bash

@@ -50,7 +50,7 @@ enzyme activity, grazing limits). It is also stored in SQLite (`data/microverse.
 `functions`, `organism_functions`), rebuilt at every start or with `scripts/build_database.py`.
 
 ## Scientific status
-Equations and visual rules **verified** by 188 automated tests. **No model is validated** against laboratory
+Equations and visual rules **verified** by 190 automated tests. **No model is validated** against laboratory
 data yet. See `docs/VERIFICATION_VS_VALIDATION.md` and `docs/SCIENTIFIC_REVIEW.md`.
 
 ## Microscope view: what is real and what is illustrative
