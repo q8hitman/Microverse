@@ -12,7 +12,8 @@ Workflow
 5. `save_report` writes an HTML + JSON report and appends the observations and the comparison to the
    database (new rows only; the prediction row is untouched).
 
-No calibration happens here. Calibration must never change a frozen prediction — it creates a new one.
+No calibration happens here. Calibration (analysis/calibration.py) never changes a frozen prediction —
+it creates a new one.
 """
 from __future__ import annotations
 
@@ -438,6 +439,10 @@ def save_report(con, fp: FrozenPrediction, table: Table, cmap: ColumnMap, result
         "created": now(),
         "status": "comparison of a frozen prediction with measurements; the prediction was not modified",
     }
+    from .calibration import same_data_warning
+    if same_data_warning(fp, table):
+        payload["warning"] = same_data_warning(fp, table)
+        payload["status"] += "; WARNING: these are the data the prediction was fitted to (a fit, not a test)"
     base.with_suffix(".json").write_text(json.dumps(payload, indent=2, default=_json_default), encoding="utf-8")
     base.with_suffix(".html").write_text(_report_html(payload, results, traj, unit_t), encoding="utf-8")
     imported = now()
@@ -520,6 +525,7 @@ frozen outcome: {H.escape(str(p['summary'].get('outcome')))}</p>
 <p>Record hash {ok(p['record_hash_ok'])} · configuration hash {ok(p['config_hash_ok'])} ·
 measurements file SHA-256 <code>{payload['observations']['sha256'][:16]}…</code></p>
 {f"<p class='note'>{H.escape(p['version_note'])}</p>" if p['version_note'] else ''}
+{f"<p class='note'><b>{H.escape(payload['warning'])}</b></p>" if payload.get('warning') else ''}
 <p class="note">The frozen prediction was re-simulated from its stored configuration and was <b>not modified</b>.
 Agreement with one data set is evidence, not proof; a model calibrated on these data must be tested on other data.</p>
 <table><tr><th>Variable</th><th>n</th><th>scale</th><th>RMSE</th><th>MAE</th><th>bias (pred−obs)</th><th>NRMSE</th>

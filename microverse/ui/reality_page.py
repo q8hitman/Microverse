@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (QComboBox, QDoubleSpinBox, QFileDialog, QFormLayo
                                QMessageBox, QPushButton, QSplitter, QTableWidget, QTableWidgetItem, QTextBrowser,
                                QVBoxLayout, QWidget)
 
+from ..analysis import calibration as C
 from ..analysis import reality as R
 from ..data import db
 from ..i18n import L, is_ar
@@ -117,6 +118,13 @@ class RealityPage(QWidget):
         self.btn_save.setEnabled(False)
         row2.addWidget(self.btn_save)
         lv.addLayout(row2)
+        self.btn_calib = QPushButton(L("5 · Calibrate → new prediction…", "٥ · عايِر ← توقع جديد…"))
+        self.btn_calib.setToolTip(L("Fit a few parameters to this data set and save the fit as a NEW prediction. "
+                                    "The selected prediction is not changed.",
+                                    "عايِر بعض المعاملات على هذه البيانات واحفظ النتيجة كتوقع جديد. "
+                                    "التوقع المختار لا يتغير."))
+        self.btn_calib.clicked.connect(self._calibrate)
+        lv.addWidget(self.btn_calib)
         lv.addStretch(1)
         split.addWidget(left)
 
@@ -302,6 +310,9 @@ class RealityPage(QWidget):
         unit_t = R.model_time_unit(self.lab.model)
         ar = is_ar()
         parts = [f"<div dir='{'rtl' if ar else 'ltr'}'>"]
+        same = C.same_data_warning(self.fp, self.table, ar)
+        if same:
+            warnings = [same] + list(warnings)
         if warnings:
             parts.append("<p style='color:#e3b341'>" + "<br>".join(html.escape(w) for w in warnings) + "</p>")
         parts.append("<table cellpadding='4' style='border-collapse:collapse'><tr>" + "".join(
@@ -321,6 +332,31 @@ class RealityPage(QWidget):
             "أعيد حساب التوقع المجمّد من إعداداته المحفوظة ولم يتغير. التطابق مع مجموعة بيانات واحدة دليل وليس برهاناً.")
                      + "</p></div>")
         self.report.setHtml("".join(parts))
+
+    def _validated(self):
+        if self.fp is None or self.table is None:
+            QMessageBox.information(self, L("Missing input", "مدخلات ناقصة"),
+                                    L("Choose a prediction and import a CSV first.", "اختر توقعاً واستورد ملفاً أولاً."))
+            return None
+        cmap = self._cmap()
+        series, errors, _w = R.validate(self.table, cmap, self.obs, self.lab.model)
+        if errors:
+            QMessageBox.warning(self, L("Please check the data", "يرجى مراجعة البيانات"), "\n".join(errors[:12]))
+            return None
+        return cmap, series
+
+    def _calibrate(self):
+        v = self._validated()
+        if v is None:
+            return
+        from .calibration_dialog import CalibrationDialog
+        cmap, series = v
+        dlg = CalibrationDialog(self.fp, self.lab, self.table, cmap, self.obs, series, self)
+        if dlg.exec() and dlg.new_pid is not None:
+            self.refresh()
+            i = self.pred_combo.findData(dlg.new_pid)
+            if i >= 0:
+                self.pred_combo.setCurrentIndex(i)
 
     def _save(self):
         if not self.results:
