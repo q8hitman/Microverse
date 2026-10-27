@@ -48,7 +48,12 @@ HOURS_PER_UNIT = 1.0                 # assumed display scale: 1 model time unit 
 PUSH = 0.01                          # growth-pressure expansion (assumed)
 NUTRIENT_SCALE = 2.0                 # 'rich medium = 1' maps to model n₀ = 2 (the compact-colony regime)
 DISH_MM = 90.0                       # standard Petri dish diameter
-FOUNDER = 0.02                       # density of a freshly plated cell's blob (invisible: threshold 0.15)
+# Density scale: a full colony (b ≈ 1) holds roughly 1e9 cells/mm² (≈1e9–1e10 cells in a few-mm² E. coli
+# colony), so one spread-mode grid square (0.32 mm²) at b = 1 holds ≈3e8 cells and ONE cell is b ≈ 3e-9.
+ONE_CELL = 3e-9
+FOUNDER = 4 * ONE_CELL               # peak of a freshly plated founder (a few cells, ~25 doublings below visibility)
+FOUNDER_SIGMA = 0.6                  # founder width in grid squares; with the ONE_CELL cut-off only the centre square
+                                     # is seeded, so a colony starts from a point, as from one plated cell
 ACID_DIFFUSION = 1.4                 # lactate diffuses ~1.4x faster than glucose in water (≈1.0 vs 0.67 ×10⁻⁹ m²/s)
 
 
@@ -64,6 +69,7 @@ class AgarOrganism:
     yield_: float = 1.0              # biomass per unit of nutrient used (fermenters keep little as biomass; assumed)
     acid_stop: float = 0.5           # acid level that stops growth at standard buffering, i.e. the organism's
                                      # pH minimum reached (assumed; high = acid tolerant)
+    incubate_h: float = 24.0         # usual incubation before colonies are read (yeast ~2 days, moulds ~3 days)
 
 
 ORGANISMS = {
@@ -71,13 +77,14 @@ ORGANISMS = {
     "bsubtilis": AgarOrganism("bsubtilis", 0.8, 1.0, (238, 236, 226), "dry",
                               "Dry, wrinkled, spreading colonies; lobed when food is scarce and agar is hard.", acid_stop=0.35),
     "scerevisiae": AgarOrganism("scerevisiae", 0.35, 0.02, (240, 232, 205), "smooth",
-                                "Glossy, round, cream colonies; slower than bacteria.", acid_stop=4.0),
+                                "Glossy, round, cream colonies; slower than bacteria.", acid_stop=4.0, incubate_h=48),
     "llactis": AgarOrganism("llactis", 0.7, 0.02, (236, 236, 228), "pinpoint",
                             "Small, round, whitish colonies; releases lactic acid that spreads into the agar.",
                             acid=0.9, yield_=0.3, acid_stop=2.0),
     "pputida": AgarOrganism("pputida", 0.6, 0.9, (226, 228, 205), "smooth", "Flat, spreading colonies.", acid_stop=0.4),
     "aoryzae": AgarOrganism("aoryzae", 0.25, 1.4, (190, 210, 150), "fuzzy",
-                            "Filamentous mould: fuzzy, expanding mycelium, yellow-green as it sporulates.", acid_stop=4.0),
+                            "Filamentous mould: fuzzy, expanding mycelium, yellow-green as it sporulates.", acid_stop=4.0,
+                            incubate_h=72),
 }
 
 
@@ -238,10 +245,12 @@ def simulate(params: AgarParams, plating: Plating, t_end: float = 60.0, frames: 
         which = (rng.random(k) < plating.mix2).astype(int) if len(orgs) == 2 else np.zeros(k, int)
         k2 = int(which.sum())
         founders = [np.zeros((n_grid, n_grid)) for _ in orgs]
-        # each founder: a tiny round blob (not one grid cell), below the visibility threshold, so a colony becomes
-        # visible only after it has grown, as on a real plate
+        # each founder: a few cells, far below the visibility threshold, so a colony becomes visible only after
+        # ~25 doublings, as on a real plate. Before v0.5.2 a founder was 2 % of a full colony spread over ~2 mm, so
+        # colonies appeared within an hour already ~6 mm across.
         for (y, x), j in zip(pick, which):
-            founders[j] += FOUNDER * np.exp(-((yy - y) ** 2 + (xx - x) ** 2) / (2 * (1.3 * res) ** 2))
+            blob = FOUNDER * np.exp(-((yy - y) ** 2 + (xx - x) ** 2) / (2 * (FOUNDER_SIGMA * res) ** 2))
+            founders[j] += np.where(blob >= ONE_CELL, blob, 0.0)
     b[0] = founders[0] * mask
     added2 = len(orgs) < 2
     noise = ndimage.gaussian_filter(rng.standard_normal((n_grid, n_grid)), 1.2 * res)   # agar varies smoothly

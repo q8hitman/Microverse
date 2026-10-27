@@ -46,8 +46,17 @@ acid halos far too narrow.
 * Spread plates: 160 × 160 grid (0.56 mm cells). Spot mode: 240 × 240 (0.375 mm cells; `spot_res` = 1.5) with the
   same physics (dx and dt rescaled), so one colony's edge is resolved better. A colony is the same size on both
   grids within 20 % (tested; the coarse grid smears edges slightly outwards).
-* Freshly plated cells start as small blobs below the visibility threshold, so colonies appear only after they
-  have grown.
+* Spread plates: a plated colony-forming unit starts as a few cells in one grid square (`FOUNDER` = 4 × `ONE_CELL`),
+  so it needs ≈25 doublings to become visible. `ONE_CELL` ≈ 3×10⁻⁹ of full density is an **assumed** scale (≈10⁹
+  cells/mm² in a full colony); it puts ≈5×10⁷ cells in a just-visible grid square, while a visual-counting study found
+  ≈5×10⁶ cells in a just-visible E. coli colony (London et al. 2010, PLoS ONE 5:e8609). A 10× error in the scale moves
+  appearance by ≈3 doublings (≈1 h for E. coli on rich agar). With the default settings the first colonies appear at
+  ≈10 h (E. coli), ≈26 h (yeast) and ≈38 h (mould): illustrative timings from the relative growth rates, not
+  calibrated per organism. Each organism has a usual incubation time (24 h bacteria, 48 h yeast, 72 h mould) that the
+  page suggests until the user sets a duration. Before v0.5.2 a founder was 2 % of a full colony spread over ≈2 mm, so
+  colonies appeared within an hour already ≈6 mm across.
+* Spot mode is different on purpose: it seeds a dense drop of culture (density 0.5, ≈2.8 mm across), which is visible
+  from the start, as a real spotted drop is.
 
 ## Parameters (defaults)
 
@@ -90,10 +99,14 @@ acid halos far too narrow.
 
 ## Known limitations
 
-* **Colony size and clock.** Colonies grow about 3–5× larger than real colonies of the same age (a real E. coli
-  colony is ≈2–3 mm across after a day). The grid (0.375–0.56 mm) cannot draw millimetre colonies, and one clock
-  cannot fit both growth and colony shape. Consequence: plates crowd and merge at lower counts than real plates,
-  so the model's "countable" range is lower than the 30–300 rule for real plates. Sizes in mm are not predictions.
+* **Colony size and clock.** Spread-plate E. coli colonies (rich agar) measure ≈1.9 mm at 12 h, ≈6.6 mm at 24 h and
+  ≈15 mm at 48 h; real colonies are ≈1 mm, 2–3 mm and 4–6 mm. So the model is ≈2–3× too large after the first day
+  (v0.5.1: 8.4, 11.9 and 18.4 mm, i.e. 3–5×). The remaining error is a grid limit: the edge of a real colony is a
+  thin monolayer, but here it advances about one grid square (0.56 mm) every few hours almost regardless of the
+  spreading constants. Rules that suppress the vanishing low-density tails at the front do slow it (to ≈0.13 mm/h),
+  but on this grid they also make compact colonies grow square (tested and rejected in v0.5.2). Consequence: plates
+  crowd and merge at lower counts than real plates, so the model's "countable" range is lower than the 30–300 rule.
+  Sizes in mm are not predictions.
 * **Branched (dendritic) colonies are not reproduced.** Poor, hard agar gives lobed, irregular colonies, but not the
   thin DLA-like branches seen with B. subtilis. Branches would be thinner than a grid cell; a much finer grid
   or a different growth rule would be needed. (v0.5 wrongly called its B. subtilis screenshot "branched"; it was a

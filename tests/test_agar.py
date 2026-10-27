@@ -112,7 +112,7 @@ def test_only_lactic_acid_bacteria_make_acid_and_it_is_bounded():
 
 def test_two_organisms_are_planted_and_counted_separately():
     r = simulate(AgarParams(organism="ecoli", organism2="scerevisiae", seed=5),
-                 Plating(density_cfu_ml=4e8, dilution_exp=6, volume_ml=0.1, mix2=0.5), 12, 2)
+                 Plating(density_cfu_ml=4e8, dilution_exp=6, volume_ml=0.1, mix2=0.5), 36, 2)   # yeast needs ~1 day
     assert 0 < r.started2 < r.started
     a, b = r.counts_by_species(len(r.frames) - 1)
     assert a + b == r.counts(len(r.frames) - 1)[0] and a > 0 and b > 0
@@ -129,7 +129,8 @@ _PLATES = {}
 
 
 def _plate(org2, acid, buffering):
-    """48 h overlay plate, cached: several tests compare the same plates."""
+    """72 h overlay plate (the partner is added at 24 h and starts from a few cells), cached: several tests compare
+    the same plates."""
     key = (org2, acid, buffering)
     if key not in _PLATES:
         saved = M.ORGANISMS["llactis"]
@@ -137,7 +138,7 @@ def _plate(org2, acid, buffering):
             M.ORGANISMS["llactis"] = dataclasses.replace(saved, acid=0.0)
         try:
             _PLATES[key] = simulate(AgarParams(organism="llactis", organism2=org2, seed=3, buffering=buffering),
-                                    OVERLAY, 48, 2)
+                                    OVERLAY, 72, 2)
         finally:
             M.ORGANISMS["llactis"] = saved
     return _PLATES[key]

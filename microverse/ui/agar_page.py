@@ -19,12 +19,16 @@ from .workers import Job
 STATUS_EN = ("Qualitative, educational model of colony morphology (Kawasaki et al. 1997; Mimura et al. 2000). "
              "Space and time are dimensionless; the clock (1 unit ≈ 1 h) and the mm scale are assumed for display. "
              "Not calibrated: use it to explore how food and agar firmness shape colonies, and how plate counts work. "
-             "Colonies grow about 3–5× larger than real colonies of the same age (a real E. coli colony is ≈2–3 mm "
-             "across after a day), because one clock cannot fit both growth and colony shape.")
+             "On spread plates colonies appear after plausible times (E. coli ≈10 h, yeast ≈1 day; illustrative), but "
+             "after the first day they are about "
+             "2–3× larger than real colonies of the same age (a real E. coli colony is ≈2–3 mm across after a day): "
+             "the grid is too coarse to draw a real colony's thin edge.")
 STATUS_AR = ("نموذج تعليمي نوعي لشكل المستعمرات (Kawasaki وزملاؤه 1997؛ Mimura وزملاؤه 2000). الزمن والمسافة بلا وحدات؛ "
              "الساعة (الوحدة ≈ ساعة) ومقياس المليمتر مفترضان للعرض. غير معاير: استخدمه لاستكشاف أثر الغذاء وصلابة الآجار "
-             "على شكل المستعمرات، وطريقة عدّ المستعمرات. المستعمرات هنا أكبر بنحو 3–5 أضعاف من مستعمرات حقيقية بالعمر نفسه "
-             "(مستعمرة الإشريكية القولونية الحقيقية ≈2–3 مم بعد يوم)، لأن ساعة واحدة لا تناسب النمو والشكل معاً.")
+             "على شكل المستعمرات، وطريقة عدّ المستعمرات. في الأطباق المفرودة تظهر المستعمرات بعد أوقات معقولة "
+             "(الإشريكية القولونية ≈10 ساعات، الخميرة ≈يوم؛ للتوضيح)، لكنها بعد اليوم الأول "
+             "أكبر بنحو 2–3 أضعاف من مستعمرات حقيقية بالعمر نفسه (مستعمرة الإشريكية القولونية الحقيقية ≈2–3 مم بعد يوم)، "
+             "لأن الشبكة أخشن من أن ترسم حافة المستعمرة الحقيقية الرقيقة.")
 
 
 # Bromocresol purple, a common pH indicator in agar: purple above pH ≈ 6.8, yellow below ≈ 5.2.
@@ -262,6 +266,13 @@ class AgarPage(QWidget):
         f3 = QFormLayout(g3)
         self.tend = QSpinBox(minimum=6, maximum=1500, value=24, suffix=L(" h", " ساعة"))
         f3.addRow(L("Incubate for", "مدة الحضانة"), self.tend)
+        # colonies start from a few cells, so slow organisms need their usual incubation time to show up. The usual
+        # time is only a suggestion: once the user types a duration, it is kept.
+        self._tend_auto = True
+        self._setting_tend = False
+        self.tend.valueChanged.connect(self._tend_edited)
+        for w in (self.org, self.org2, self.delay):
+            (w.currentIndexChanged if isinstance(w, QComboBox) else w.valueChanged).connect(self._usual_incubation)
         self.seed = QSpinBox(minimum=0, maximum=99999, value=1)
         f3.addRow(L("Random seed", "البذرة العشوائية"), self.seed)
         lv.addWidget(g3)
@@ -319,6 +330,20 @@ class AgarPage(QWidget):
     def _plating(self) -> Plating:
         return Plating(self.mode.currentData(), 10 ** self.dens.value(), self.dil.value(), self.vol.value(),
                        mix2=self.mix.value() / 100, spot_gap_mm=self.gap.value(), delay2_h=self.delay.value())
+
+    def _tend_edited(self, *_):
+        if not self._setting_tend:
+            self._tend_auto = False
+
+    def _usual_incubation(self, *_):
+        if not self._tend_auto:
+            return
+        hours = ORGANISMS[self.org.currentData()].incubate_h
+        if self.org2.currentData():
+            hours = max(hours, self.delay.value() + ORGANISMS[self.org2.currentData()].incubate_h)
+        self._setting_tend = True
+        self.tend.setValue(int(hours))
+        self._setting_tend = False
 
     def _update_expect(self):
         pl = self._plating()
