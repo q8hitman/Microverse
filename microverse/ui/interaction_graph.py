@@ -76,7 +76,7 @@ class InteractionGraph(QWidget):
             p.drawEllipse(c, 12, 12)
             ux, uy = (c.x() - cx) / max(R, 1), (c.y() - cy) / max(R, 1)       # name outside the circle
             tx, ty = c.x() + ux * 26, c.y() + uy * 22
-            align = (Qt.AlignLeft if ux > 0.3 else Qt.AlignRight if ux < -0.3 else Qt.AlignHCenter) | Qt.AlignVCenter \n                | Qt.AlignAbsolute                                             # geometry, not reading direction
+            align = (Qt.AlignLeft if ux > 0.3 else Qt.AlignRight if ux < -0.3 else Qt.AlignHCenter) | Qt.AlignVCenter | Qt.AlignAbsolute
             box = QRectF(tx - (0 if ux > 0.3 else 120 if ux < -0.3 else 60), ty - 8, 120, 16)
             p.setPen(QColor("#e6edf3"))
             p.drawText(box, align, short_name(k))
