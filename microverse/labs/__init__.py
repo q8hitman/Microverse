@@ -7,10 +7,9 @@ from . import chemostat, community, yogurt
 from .base import Lab
 
 PLANNED = (
-    ("Virtual Agar & Colonies", "الآجار الافتراضي والمستعمرات", "Colony growth and spread on different media"),
     ("Biofilm Simulator", "محاكي الأغشية الحيوية", "Attachment, oxygen gradients, cross-sections"),
     ("Bioinformatics", "المعلوماتية الحيوية", "FASTA/FASTQ, diversity, phylogenetic trees"),
-    ("Prediction vs Reality", "التوقع مقابل الواقع", "Import your lab measurements and score the model"),
+    ("Agar: competition & antibiotics-free zones", "الآجار: التنافس بين المستعمرات", "Two species on one plate"),
 )
 
 

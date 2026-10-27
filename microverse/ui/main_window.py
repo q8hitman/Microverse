@@ -6,6 +6,7 @@ from PySide6.QtWidgets import QMainWindow, QMessageBox, QStackedWidget
 
 from .. import i18n
 from ..i18n import L
+from .agar_page import AgarPage
 from .reality_page import RealityPage
 from .start_screen import LibraryPage, StartScreen
 from .workspace import Workspace
@@ -69,7 +70,7 @@ class MainWindow(QMainWindow):
         self._menu()
 
     def _build(self):
-        for old in (self.start, self.library, getattr(self, "reality", None)):
+        for old in (self.start, self.library, getattr(self, "reality", None), getattr(self, "agar", None)):
             if old is not None:
                 self.stack.removeWidget(old)
                 old.deleteLater()
@@ -78,7 +79,9 @@ class MainWindow(QMainWindow):
         self.start.open_library.connect(lambda: self.stack.setCurrentWidget(self.library))
         self.start.lang_changed.connect(self.change_language)
         self.start.open_reality.connect(self.open_reality)
+        self.start.open_agar.connect(self.open_agar)
         self.reality = None
+        self.agar = None
         self.library = LibraryPage()
         self.library.back.connect(self.home)
         self.stack.addWidget(self.start)
@@ -124,6 +127,13 @@ class MainWindow(QMainWindow):
         else:
             self.reality.refresh()
         self.stack.setCurrentWidget(self.reality)
+
+    def open_agar(self):
+        if self.agar is None:
+            self.agar = AgarPage()
+            self.agar.back.connect(self.home)
+            self.stack.addWidget(self.agar)
+        self.stack.setCurrentWidget(self.agar)
 
     def home(self):
         self.stack.setCurrentWidget(self.start)
