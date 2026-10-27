@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.5.0 — 2026-10-27 — Continuous microscope, Prediction vs Reality, Virtual Agar
+- **Fixed: organisms popped in and out.** Root cause: every scene used an immigration–death process. Drawn
+  cells vanished with probability dt/0.6 s and new ones were dropped at random positions every frame, even
+  while paused (374 random spawns in 10 s with 23 cells on screen, measured on v0.4). The dilution factor also
+  changed in 2× steps, and positions wrapped across edges. Replaced by a persistent visual engine
+  (`viz/population.py`, `viz/specimen.py`): agents with ids; counts change only through division (12
+  organism-specific styles), lysis, grazing by a visible predator, or swimming out of or into view; one sample
+  factor per run; interpolated state; reflecting edges.
+- **Morphology for all 30 organisms** (`library/morphology.py`): shape, size, arrangement, motility (11 styles
+  with literature speeds), division style, structures, provenance. Procedurally drawn in three modes
+  (Realistic, Microscope = phase contrast or Gram stain, Explanation overlays). Zoom, pan, click-to-inspect,
+  Replay, swimming-speed control, playback using measured frame time.
+- **Prediction vs Reality** (start screen): import measurements (CSV), map columns and units (log10 CFU,
+  timestamps), validate, re-simulate the frozen prediction (hashes and model version checked, never modified).
+  Metrics: RMSE, MAE, bias, NRMSE, R², best time shift. Plain-language explanation; HTML/JSON report;
+  observations and an append-only comparisons table in the database.
+- **Why? panel: "What changed, and why"**: for each variable that changed, the flux terms responsible, integrated
+  exactly, with the share of the change they explain, the parameter evidence, sensitivity and a measurement that
+  would test it.
+- **Replicates tab** (chemostat): N stochastic runs with consecutive seeds; extinction probability with a Wilson
+  95 % CI; 5–95 % envelopes.
+- **Virtual Agar** (start screen): 2-D colony model (Kawasaki 1997 / Mimura 2000 type) on a 90 mm dish;
+  compact versus branched morphology from food and agar firmness; spread-plate counts with Poisson founders and
+  merging colonies; time-lapse; counted-colony markers. Qualitative.
+- **Who's Who interaction network**: trait-based arrows (eats, feeds, oxygen, acid, compete) plus measured
+  results.
+- **Scientific fixes:** yoghurt model 1.1.0 (peptide pool could go negative; see SCIENTIFIC_REVIEW A1);
+  biosafety described per strain and jurisdiction with representative strains; drawn-cell mass from shape volume.
+  The chemostat parameters were checked against the values reported for Fussmann et al. (2000).
+- **Arabic:** names for every model parameter; new screens are bilingual.
+- **Tests:** 188 (was 76), including off-screen construction of every screen.
+- Docs: DEVELOPMENT_AUDIT, VISUALIZATION_ARCHITECTURE, SCIENTIFIC_REVIEW, OVERNIGHT_PROGRESS, models/agar.
+
 ## 0.4.0 — 2026-10-27 — What each organism does; two-panel microscope; calmer interface
 - **Function reference** (`microverse/library/functions.py`): 20 functions (primary producer, oxygen producer,
   lactic/alcohol fermenter, acidifier, decomposer, cross-feeder, aerobic scavenger, bacterial/algal grazer,

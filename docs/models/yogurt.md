@@ -1,4 +1,4 @@
-# Model: `yogurt` (v1.0.0) — EXPLORATORY
+# Model: `yogurt` (v1.1.0) — EXPLORATORY
 
 ## Biological interpretation
 Milk inoculated with *Streptococcus thermophilus* (ST) and *Lactobacillus delbrueckii* subsp. *bulgaricus* (LB) and held at a constant temperature. Both ferment the glucose half of lactose to lactic acid and excrete galactose. Falling pH makes casein micelles aggregate (gel onset ≈ pH 5.2, end point ≈ pH 4.6 = casein isoelectric point). LB proteolysis releases peptides that ST needs; ST produces formate that stimulates LB (protocooperation).
@@ -29,3 +29,8 @@ Cardinal functions = 1 at optimum and 0 outside limits; pH curve monotonic with 
 
 ## Validation status
 **Not validated.** Ideal first study: measure pH every 15–30 min for several temperatures and starter ratios, freeze the predictions first, then calibrate on part of the data and test on the rest.
+
+## Change log
+- **1.1.0 (v0.5):** peptide uptake by *S. thermophilus* is limited by availability,
+  `y_P·μ_S·X_S·P/(P + 0.5 mg/L)`. In 1.0.0 the pool could be driven below zero (−9 mg/L when *S. thermophilus*
+  grows alone), which the solver's clipping hid. Results change only once peptides are nearly exhausted.

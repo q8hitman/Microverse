@@ -44,14 +44,14 @@ def finish(name):
 
 
 at(400, w.open_agar)
-at(300, lambda: setup("ecoli", 1.0, 1.0, "spread", 6, 72))
+at(300, lambda: setup("ecoli", 1.0, 1.0, "spread", 6, 24))
 at(6000, lambda: finish("v05_agar_count.png"))
 at(600, lambda: shot("v05_agar_count.png"))
-at(300, lambda: setup("bsubtilis", 0.45, 0.7, "spot", 6, 600))
-at(14000, lambda: finish("v05_agar_dendritic.png"))
+at(300, lambda: setup("bsubtilis", 0.5, 1.0, "spot", 6, 400))
+at(16000, lambda: finish("v05_agar_dendritic.png"))
 at(600, lambda: shot("v05_agar_dendritic.png"))
 at(300, lambda: setup("aoryzae", 1.0, 1.0, "spot", 6, 200))
-at(9000, lambda: finish("v05_agar_mould.png"))
+at(12000, lambda: finish("v05_agar_mould.png"))
 at(600, lambda: shot("v05_agar_mould.png"))
 at(300, app.quit)
 for ms, fn in steps:

@@ -28,6 +28,8 @@ import numpy as np
 from scipy import ndimage
 
 HOURS_PER_UNIT = 1.0                 # assumed display scale: 1 model time unit ≈ 1 h
+PUSH = 0.01                          # growth-pressure expansion (assumed)
+NUTRIENT_SCALE = 2.0                 # 'rich medium = 1' maps to model n₀ = 2 (the compact-colony regime)
 DISH_MM = 90.0                       # standard Petri dish diameter
 
 
@@ -35,19 +37,19 @@ DISH_MM = 90.0                       # standard Petri dish diameter
 class AgarOrganism:
     key: str
     growth: float                    # relative growth rate μ (dimensionless, from μmax)
-    spread: float                    # relative spreading (motility on agar)
+    spread: float                    # relative spreading on agar: low for non-swarming cells on hard agar (assumed)
     colour: tuple[int, int, int]     # colony colour on the plate (RGB)
     texture: str                     # "smooth", "dry", "fuzzy", "pinpoint"
     note: str
 
 
 ORGANISMS = {
-    "ecoli": AgarOrganism("ecoli", 1.0, 0.6, (232, 220, 190), "smooth", "Smooth, cream-coloured colonies."),
+    "ecoli": AgarOrganism("ecoli", 1.0, 0.03, (232, 220, 190), "smooth", "Smooth, cream-coloured colonies."),
     "bsubtilis": AgarOrganism("bsubtilis", 0.8, 1.0, (238, 236, 226), "dry",
                               "Dry, wrinkled, spreading colonies; branched when food is scarce and agar is hard."),
-    "scerevisiae": AgarOrganism("scerevisiae", 0.35, 0.25, (240, 232, 205), "smooth",
+    "scerevisiae": AgarOrganism("scerevisiae", 0.35, 0.02, (240, 232, 205), "smooth",
                                 "Glossy, round, cream colonies; slower than bacteria."),
-    "llactis": AgarOrganism("llactis", 0.7, 0.15, (236, 236, 228), "pinpoint", "Small, round, whitish colonies."),
+    "llactis": AgarOrganism("llactis", 0.7, 0.02, (236, 236, 228), "pinpoint", "Small, round, whitish colonies."),
     "pputida": AgarOrganism("pputida", 0.6, 0.9, (226, 228, 205), "smooth", "Flat, spreading colonies."),
     "aoryzae": AgarOrganism("aoryzae", 0.25, 1.4, (190, 210, 150), "fuzzy",
                             "Filamentous mould: fuzzy, expanding mycelium, yellow-green as it sporulates."),
@@ -137,7 +139,7 @@ def simulate(params: AgarParams, plating: Plating, t_end: float = 60.0, frames: 
     org = ORGANISMS[params.organism]
     n_grid = params.grid
     mask = dish_mask(n_grid)
-    n = np.where(mask, params.nutrient, 0.0)
+    n = np.where(mask, params.nutrient * NUTRIENT_SCALE, 0.0)
     b = np.zeros((n_grid, n_grid))
     s = np.zeros_like(b)
     yy, xx = np.mgrid[0:n_grid, 0:n_grid]
@@ -151,8 +153,8 @@ def simulate(params: AgarParams, plating: Plating, t_end: float = 60.0, frames: 
         r = (n_grid - 1) / 2
         ok = inside[((inside - r) ** 2).sum(1) <= (r - 4) ** 2]
         pick = ok[rng.integers(0, len(ok), size=k)] if k else np.zeros((0, 2), int)
-        for y, x in pick:
-            b[y, x] += 0.5
+        for y, x in pick:                                   # each founder: a tiny round blob, not one grid cell
+            b += 0.5 * np.exp(-((yy - y) ** 2 + (xx - x) ** 2) / (2 * 1.3 ** 2))
     noise = ndimage.gaussian_filter(rng.standard_normal(b.shape), 1.2)   # agar varies smoothly, not per cell
     noise /= max(noise.std(), 1e-9)
     hetero = np.clip(1 + params.heterogeneity * noise, 0.05, None)
@@ -173,7 +175,9 @@ def simulate(params: AgarParams, plating: Plating, t_end: float = 60.0, frames: 
         stop = params.a0 / ((1 + b / params.k1) * (1 + n / params.k2)) * b
         Db = D * n * b
         n = n + dt * (_lap(n) - growth)
-        b = b + dt * (_div_flux(b, Db) + growth - stop)
+        # plus a small linear, isotropic push of growing cells (growth pressure), so colonies of cells that
+        # hardly spread stay round instead of taking the grid's square shape
+        b = b + dt * (_div_flux(b, Db) + PUSH * np.minimum(n, 1.0) * _lap(b) + growth - stop)
         s = s + dt * stop
         n = np.where(mask, np.maximum(n, 0.0), 0.0)
         b = np.where(mask, np.maximum(b, 0.0), 0.0)

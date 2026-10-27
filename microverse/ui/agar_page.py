@@ -31,6 +31,9 @@ def plate_image(run: AgarRun, i: int, explain: bool = False) -> QImage:
     n = f.shape[0]
     org = ORGANISMS[run.params.organism]
     h = np.clip(f / 3.0, 0, 1.2)
+    if org.texture in ("smooth", "pinpoint"):                               # glossy colonies are domes
+        from scipy import ndimage
+        h = ndimage.gaussian_filter(np.clip(f / 1.5, 0, 1.0), 1.6) * 1.2
     gy, gx = np.gradient(h)
     shade = np.clip(0.78 + 2.2 * (-gx * 0.6 - gy * 0.8), 0.45, 1.25)       # light from the upper left
     alpha = np.clip((f - 0.08) / 0.5, 0, 1)
@@ -44,7 +47,7 @@ def plate_image(run: AgarRun, i: int, explain: bool = False) -> QImage:
         shade = shade * (1 + 0.12 * wr * alpha)
     agar = np.array([206, 176, 112], np.float32)                           # nutrient agar, amber
     agar_poor = np.array([214, 196, 150], np.float32)
-    rich = np.clip(nut / max(run.params.nutrient, 1e-6), 0, 1)[..., None]
+    rich = np.clip(nut / max(run.params.nutrient * 2.0, 1e-6), 0, 1)[..., None]
     base = agar_poor + (agar - agar_poor) * rich
     col = np.array(org.colour, np.float32)
     if org.texture == "fuzzy":                                              # older mycelium sporulates (greener)
@@ -195,7 +198,7 @@ class AgarPage(QWidget):
         lv.addWidget(g2)
         g3 = QGroupBox(L("Incubation", "الحضانة"))
         f3 = QFormLayout(g3)
-        self.tend = QSpinBox(minimum=12, maximum=1500, value=72, suffix=" h")
+        self.tend = QSpinBox(minimum=6, maximum=1500, value=24, suffix=" h")
         f3.addRow(L("Incubate for", "مدة الحضانة"), self.tend)
         self.seed = QSpinBox(minimum=0, maximum=99999, value=1)
         f3.addRow(L("Random seed", "البذرة العشوائية"), self.seed)

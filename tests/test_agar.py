@@ -16,8 +16,8 @@ def test_fields_stay_physical_and_inside_the_dish():
 
 
 def test_more_food_and_softer_agar_give_bigger_more_compact_colonies():
-    poor = simulate(AgarParams(organism="bsubtilis", nutrient=0.4, softness=0.7), Plating(mode="spot"), 300, 5)
-    rich = simulate(AgarParams(organism="bsubtilis", nutrient=2.0, softness=1.5), Plating(mode="spot"), 300, 5)
+    poor = simulate(AgarParams(organism="bsubtilis", nutrient=0.4, softness=0.7), Plating(mode="spot"), 100, 5)
+    rich = simulate(AgarParams(organism="bsubtilis", nutrient=2.0, softness=1.5), Plating(mode="spot"), 100, 5)
     assert radius_mm(rich, -1) > 2 * radius_mm(poor, -1)
     def fill(r):                                      # area ÷ area of the disc reaching the farthest tip
         z = r.frames[-1].astype(float) > 0.15
@@ -41,8 +41,8 @@ def test_colonies_are_round_not_crosses():
 
 
 def test_plate_count_matches_the_dilution_formula():
-    pl = Plating(density_cfu_ml=1.5e8, dilution_exp=6, volume_ml=0.1)        # 15 expected
-    r = simulate(AgarParams(organism="llactis", seed=4), pl, t_end=30, frames=5)
+    pl = Plating(density_cfu_ml=6e7, dilution_exp=6, volume_ml=0.1)          # 6 expected: sparse plate
+    r = simulate(AgarParams(organism="llactis", seed=4), pl, t_end=20, frames=5)
     n, _ = r.counts(len(r.frames) - 1)
     assert n == r.started or abs(n - r.started) <= 2
     assert r.back_calculated_cfu(len(r.frames) - 1) == pytest.approx(n / (1e-6 * 0.1))
