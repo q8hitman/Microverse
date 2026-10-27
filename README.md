@@ -36,7 +36,7 @@ On another PC: `python -m venv .venv` then `.venv/Scripts/pip install -r require
 - **Printable guide (PDF)** and **spreadsheet (CSV)** from the Library, in English or Arabic.
 
 ## Organism database
-30 organisms, all biosafety level 1. Every record drives both the library card (classification, NCBI Taxonomy ID,
+30 organisms whose usual teaching/food strains are Risk Group 1 (classification is per strain and country). Every record drives both the library card (classification, NCBI Taxonomy ID,
 size, shape, metabolism, reproduction, role, uses, references — English and Arabic) and the simulation
 (growth rate, half-saturation, yield, cardinal temperature and pH, oxygen requirement, substrates, products,
 enzyme activity, grazing limits). It is also stored in SQLite (`data/microverse.sqlite`: tables `organism_db`,

@@ -120,6 +120,7 @@ class OrganismCard(QFrame):
                 (L("Habitat", "الموطن"), f"{e(org.habitat)} — <span dir='rtl'>{e(org.habitat_ar)}</span>"),
                 (L("Reproduction", "التكاثر"), f"{e(org.reproduction)}<br><span dir='rtl'>{e(org.reproduction_ar)}</span>"),
                 (L("Uses", "الاستخدامات"), f"{e(org.applications)} — <span dir='rtl'>{e(org.applications_ar)}</span>"),
+                (L("Strain described", "السلالة الموصوفة"), e(org.strain) if org.strain else L("not strain-specific", "غير خاص بسلالة")),
                 (L("Biosafety", "السلامة الحيوية"), f"{e(org.biosafety)}<br><span dir='rtl'>{e(org.biosafety_ar)}</span>"),
                 (L("Traits in the model", "الصفات في النموذج"),
                  L(f"max growth {org.mu_max:g} /h · half-saturation {org.ks:g} mg/L · yield {org.yield_bio:g} · "

@@ -4,8 +4,9 @@ ONE record per organism, used for BOTH the library cards and the simulation:
 * descriptive fields (what it is, bilingual) → organism cards
 * trait fields (physiology numbers) → the community model
 
-Scope: harmless (biosafety level 1) organisms used in teaching labs, food production
-and environmental microbiology. Pathogens are deliberately not included.
+Scope: organisms whose usual teaching/food/laboratory strains are Risk Group 1 (low risk) in most
+national lists. Biosafety is a property of a STRAIN in a jurisdiction, not of a species name, so each
+record names the representative strain where it matters. Pathogens are deliberately not included.
 
 Evidence: `trait_evidence` says how the numbers were obtained. Most are
 LITERATURE_ESTIMATE (typical textbook order of magnitude) or ASSUMED (chosen so the
@@ -100,8 +101,11 @@ class Organism:
     role_ar: str = ""
     applications: str = ""
     applications_ar: str = ""
-    biosafety: str = "Biosafety level 1 (harmless); used in teaching labs."
-    biosafety_ar: str = "مستوى السلامة الحيوية 1 (غير ممرض)، يُستخدم في مختبرات التدريس."
+    biosafety: str = ("Typical teaching/food strains are Risk Group 1 in most national lists. Classification is "
+                      "per strain and per country: check your institution's list before working with it.")
+    biosafety_ar: str = ("السلالات المستخدمة عادة في التدريس والغذاء من مجموعة الخطورة 1 في أغلب القوائم الوطنية. "
+                         "التصنيف يعتمد على السلالة والدولة: راجع قائمة مؤسستك قبل العمل.")
+    strain: str = ""                   # representative strain the description refers to (classification is per strain)
     trait_evidence: Evidence = Evidence.LITERATURE_ESTIMATE
     model_variables: tuple[str, ...] = ()
     notes: tuple[str, ...] = ()
@@ -122,7 +126,7 @@ def _o(**kw) -> Organism:
 
 _LIST = [
     # ===================== lactic acid bacteria / dairy =====================
-    _o(key="sthermophilus", name="Streptococcus thermophilus", name_ar="ستربتوكوكس ثيرموفيلس",
+    _o(key="sthermophilus", strain="commercial yoghurt starters", name="Streptococcus thermophilus", name_ar="ستربتوكوكس ثيرموفيلس",
        common="Yoghurt starter coccus", common_ar="بكتيريا بادئ اللبن الكروية",
        group="Lactic acid bacterium (Gram-positive)", group_ar="بكتيريا حمض اللاكتيك – موجبة الغرام",
        ncbi_taxid=1308, lineage=("Bacteria", "Bacillota", "Bacilli", "Lactobacillales", "Streptococcaceae",
@@ -144,7 +148,7 @@ _LIST = [
        notes=("More acid-sensitive than L. bulgaricus: it stops growing first as the pH falls.",),
        references=("Tamime & Robinson (2007) Yoghurt: Science and Technology",
                    "Sieuwerts et al. (2008) Appl Environ Microbiol 74:4997")),
-    _o(key="lbulgaricus", name="Lactobacillus delbrueckii subsp. bulgaricus",
+    _o(key="lbulgaricus", strain="commercial yoghurt starters", name="Lactobacillus delbrueckii subsp. bulgaricus",
        name_ar="لاكتوباسيلس دلبروكي تحت نوع بلغاريكس",
        common="Yoghurt starter rod", common_ar="بكتيريا بادئ اللبن العصوية",
        group="Lactic acid bacterium (Gram-positive)", group_ar="بكتيريا حمض اللاكتيك – موجبة الغرام",
@@ -167,7 +171,7 @@ _LIST = [
        notes=("Kept the name Lactobacillus after the 2020 reclassification (Zheng et al. 2020).",),
        references=("Tamime & Robinson (2007) Yoghurt: Science and Technology",
                    "Zheng et al. (2020) Int J Syst Evol Microbiol 70:2782")),
-    _o(key="llactis", name="Lactococcus lactis", name_ar="لاكتوكوكس لاكتس",
+    _o(key="llactis", strain="IL1403 / MG1363 / dairy starters", name="Lactococcus lactis", name_ar="لاكتوكوكس لاكتس",
        common="Cheese starter", common_ar="بادئ الجبن",
        group="Lactic acid bacterium (Gram-positive)", group_ar="بكتيريا حمض اللاكتيك – موجبة الغرام",
        ncbi_taxid=1358, lineage=("Bacteria", "Bacillota", "Bacilli", "Lactobacillales", "Streptococcaceae",
@@ -188,7 +192,7 @@ _LIST = [
        applications_ar="الشيدر والفيتا واللبن الرائب، وكائن نموذجي في الوراثة",
        biosafety="Safe food organism (QPS/GRAS).", biosafety_ar="كائن غذائي آمن (QPS/GRAS).",
        references=("Song et al. (2017) Appl Microbiol Biotechnol 101:5861",)),
-    _o(key="lplantarum", name="Lactiplantibacillus plantarum", name_ar="لاكتيبلانتيباسيلس بلانتاروم",
+    _o(key="lplantarum", strain="WCFS1 / food isolates", name="Lactiplantibacillus plantarum", name_ar="لاكتيبلانتيباسيلس بلانتاروم",
        common="Pickle/vegetable fermenter", common_ar="بكتيريا تخمير الخضار والمخللات",
        group="Lactic acid bacterium (Gram-positive)", group_ar="بكتيريا حمض اللاكتيك – موجبة الغرام",
        ncbi_taxid=1590, lineage=("Bacteria", "Bacillota", "Bacilli", "Lactobacillales", "Lactobacillaceae",
@@ -230,7 +234,7 @@ _LIST = [
        applications="Sauerkraut, kimchi, dextran production",
        applications_ar="المخلل الملفوف والكيمتشي وإنتاج الدكستران",
        references=("Hammes & Hertel, in The Prokaryotes",)),
-    _o(key="pfreudenreichii", name="Propionibacterium freudenreichii", name_ar="بروبيونيباكتيريوم فرويدنرايشي",
+    _o(key="pfreudenreichii", strain="dairy strains", name="Propionibacterium freudenreichii", name_ar="بروبيونيباكتيريوم فرويدنرايشي",
        common="Swiss cheese bacterium", common_ar="بكتيريا الجبن السويسري",
        group="Actinomycete (Gram-positive)", group_ar="بكتيريا أكتينية – موجبة الغرام",
        ncbi_taxid=1744, lineage=("Bacteria", "Actinomycetota", "Actinomycetes", "Propionibacteriales",
@@ -271,7 +275,7 @@ _LIST = [
        applications="Vinegar production", applications_ar="إنتاج الخل",
        references=("Mamlouk & Gullo (2013) Indian J Microbiol 53:377",)),
     # ===================== yeasts & fungi =====================
-    _o(key="scerevisiae", name="Saccharomyces cerevisiae", name_ar="ساكاروميسيس سيريفيزي",
+    _o(key="scerevisiae", strain="S288C / baker's and brewer's strains", name="Saccharomyces cerevisiae", name_ar="ساكاروميسيس سيريفيزي",
        common="Baker's / brewer's yeast", common_ar="خميرة الخبز والبيرة",
        group="Yeast (eukaryote, fungus)", group_ar="خميرة – فطر حقيقي النواة",
        ncbi_taxid=4932, lineage=("Eukaryota", "Fungi", "Ascomycota", "Saccharomycetes", "Saccharomycetales",
@@ -292,7 +296,7 @@ _LIST = [
        applications="Bread, beer, wine, bioethanol; the model eukaryote",
        applications_ar="الخبز والبيرة والنبيذ والإيثانول الحيوي، والكائن النموذجي حقيقي النواة",
        references=("Walker & Stewart (2016) Beverages 2:30",)),
-    _o(key="klactis", name="Kluyveromyces lactis", name_ar="كلويفيروميسيس لاكتس",
+    _o(key="klactis", strain="dairy strains", name="Kluyveromyces lactis", name_ar="كلويفيروميسيس لاكتس",
        common="Dairy yeast", common_ar="خميرة الألبان",
        group="Yeast (eukaryote, fungus)", group_ar="خميرة – فطر حقيقي النواة",
        ncbi_taxid=28985, lineage=("Eukaryota", "Fungi", "Ascomycota", "Saccharomycetes", "Saccharomycetales",
@@ -310,7 +314,7 @@ _LIST = [
        applications="Lactase enzyme, kefir, whey valorisation",
        applications_ar="إنزيم اللاكتيز والكفير والاستفادة من الشرش",
        references=("Rodicio & Heinisch (2013) FEMS Yeast Res 13:11",)),
-    _o(key="aoryzae", name="Aspergillus oryzae", name_ar="أسبرجيلس أوريزي",
+    _o(key="aoryzae", strain="RIB40 / koji strains", name="Aspergillus oryzae", name_ar="أسبرجيلس أوريزي",
        common="Koji mould", common_ar="فطر الكوجي",
        group="Filamentous fungus (mould)", group_ar="فطر خيطي (عفن)",
        ncbi_taxid=5062, lineage=("Eukaryota", "Fungi", "Ascomycota", "Eurotiomycetes", "Eurotiales",
@@ -332,7 +336,7 @@ _LIST = [
        biosafety="Biosafety level 1; domesticated, non-toxigenic (unlike A. flavus).",
        biosafety_ar="مستوى السلامة 1، مُدجّن وغير منتج للسموم (بخلاف A. flavus).",
        references=("Machida et al. (2005) Nature 438:1157",)),
-    _o(key="proqueforti", name="Penicillium roqueforti", name_ar="بنيسيليوم روكفورتي",
+    _o(key="proqueforti", strain="cheese strains", name="Penicillium roqueforti", name_ar="بنيسيليوم روكفورتي",
        common="Blue cheese mould", common_ar="عفن الجبن الأزرق",
        group="Filamentous fungus (mould)", group_ar="فطر خيطي (عفن)",
        ncbi_taxid=5082, lineage=("Eukaryota", "Fungi", "Ascomycota", "Eurotiomycetes", "Eurotiales",
@@ -351,7 +355,7 @@ _LIST = [
        role_ar="عفن الإنضاج – يغير القوام والنكهة أكثر من الحموضة",
        applications="Roquefort, Gorgonzola, Stilton", applications_ar="أجبان روكفور وغورغونزولا وستيلتون",
        references=("Ropars et al. (2020) Curr Biol 30:4441",)),
-    _o(key="roligosporus", name="Rhizopus oligosporus", name_ar="ريزوبس أوليغوسبورس",
+    _o(key="roligosporus", strain="tempeh starters", name="Rhizopus oligosporus", name_ar="ريزوبس أوليغوسبورس",
        common="Tempeh mould", common_ar="فطر التمبي",
        group="Filamentous fungus (mould)", group_ar="فطر خيطي (عفن)",
        ncbi_taxid=64495, lineage=("Eukaryota", "Fungi", "Mucoromycota", "Mucoromycetes", "Mucorales",
@@ -370,7 +374,7 @@ _LIST = [
        applications="Tempeh", applications_ar="التمبي",
        references=("Nout & Kiers (2005) J Appl Microbiol 98:789",)),
     # ===================== other bacteria =====================
-    _o(key="bsubtilis", name="Bacillus subtilis", name_ar="باسيلس سبتيلس",
+    _o(key="bsubtilis", strain="168", name="Bacillus subtilis", name_ar="باسيلس سبتيلس",
        common="Hay bacillus", common_ar="عصية القش",
        group="Endospore-forming bacterium (Gram-positive)", group_ar="بكتيريا مكوّنة للأبواغ – موجبة الغرام",
        ncbi_taxid=1423, lineage=("Bacteria", "Bacillota", "Bacilli", "Bacillales", "Bacillaceae",
@@ -391,7 +395,7 @@ _LIST = [
        applications="Enzymes, probiotics, natto; the Gram-positive model organism",
        applications_ar="الإنزيمات والبروبيوتيك والناتو، والكائن النموذجي موجب الغرام",
        references=("Earl et al. (2008) Trends Microbiol 16:269",)),
-    _o(key="ecoli", name="Escherichia coli K-12", name_ar="إشريشيا كولاي سلالة K-12",
+    _o(key="ecoli", strain="K-12 (e.g. MG1655)", name="Escherichia coli K-12", name_ar="إشريشيا كولاي سلالة K-12",
        common="Laboratory E. coli", common_ar="بكتيريا القولون المخبرية",
        group="Enteric bacterium (Gram-negative)", group_ar="بكتيريا معوية – سالبة الغرام",
        ncbi_taxid=83333, lineage=("Bacteria", "Pseudomonadota", "Gammaproteobacteria", "Enterobacterales",
@@ -414,7 +418,7 @@ _LIST = [
                  "It is NOT the pathogenic O157:H7.",
        biosafety_ar="سلالة K-12 مخبرية مدجّنة وغير ممرضة (مستوى 1)، وهي ليست السلالة الممرضة O157:H7.",
        references=("Blattner et al. (1997) Science 277:1453",)),
-    _o(key="pputida", name="Pseudomonas putida", name_ar="سودوموناس بوتيدا",
+    _o(key="pputida", strain="KT2440", name="Pseudomonas putida", name_ar="سودوموناس بوتيدا",
        common="Soil pseudomonad", common_ar="سودوموناس التربة",
        group="Soil bacterium (Gram-negative)", group_ar="بكتيريا تربة – سالبة الغرام",
        ncbi_taxid=303, lineage=("Bacteria", "Pseudomonadota", "Gammaproteobacteria", "Pseudomonadales",
@@ -435,7 +439,7 @@ _LIST = [
        biosafety="Biosafety level 1 (certified strains such as KT2440).",
        biosafety_ar="مستوى السلامة 1 (سلالات معتمدة مثل KT2440).",
        references=("Nelson et al. (2002) Environ Microbiol 4:799",)),
-    _o(key="azotobacter", name="Azotobacter vinelandii", name_ar="أزوتوباكتر فينلاندي",
+    _o(key="azotobacter", strain="DJ / ATCC 12837", name="Azotobacter vinelandii", name_ar="أزوتوباكتر فينلاندي",
        common="Nitrogen-fixing soil bacterium", common_ar="بكتيريا تثبيت النيتروجين",
        group="Soil bacterium (Gram-negative)", group_ar="بكتيريا تربة – سالبة الغرام",
        ncbi_taxid=354, lineage=("Bacteria", "Pseudomonadota", "Gammaproteobacteria", "Pseudomonadales",
@@ -456,7 +460,7 @@ _LIST = [
        applications_ar="الأسمدة الحيوية وإنتاج الألجينات وأبحاث إنزيم النيتروجينيز",
        notes=("In the simulation its nitrogen quota is 0, which represents nitrogen fixation.",),
        references=("Setubal et al. (2009) J Bacteriol 191:4534",)),
-    _o(key="nitrosomonas", name="Nitrosomonas europaea", name_ar="نيتروزوموناس يوروبيا",
+    _o(key="nitrosomonas", strain="ATCC 19718", name="Nitrosomonas europaea", name_ar="نيتروزوموناس يوروبيا",
        common="Ammonia oxidiser", common_ar="مؤكسد الأمونيا",
        group="Chemolithotroph (Gram-negative)", group_ar="ذاتي التغذية كيميائياً – سالب الغرام",
        ncbi_taxid=915, lineage=("Bacteria", "Pseudomonadota", "Betaproteobacteria", "Nitrosomonadales",
@@ -476,7 +480,7 @@ _LIST = [
        applications="Wastewater treatment, aquarium cycling, nitrogen cycle teaching",
        applications_ar="معالجة الصرف وتهيئة أحواض الأسماك وتدريس دورة النيتروجين",
        references=("Chain et al. (2003) J Bacteriol 185:2759",)),
-    _o(key="synechococcus", name="Synechococcus elongatus", name_ar="سينيكوكوكس إيلونجاتس",
+    _o(key="synechococcus", strain="PCC 7942", name="Synechococcus elongatus", name_ar="سينيكوكوكس إيلونجاتس",
        common="Cyanobacterium (blue-green alga)", common_ar="بكتيريا زرقاء مخضرة",
        group="Cyanobacterium (Gram-negative, photosynthetic)", group_ar="بكتيريا زرقاء – سالبة الغرام وضوئية",
        ncbi_taxid=32046, lineage=("Bacteria", "Cyanobacteriota", "Cyanophyceae", "Synechococcales",
@@ -496,7 +500,7 @@ _LIST = [
        applications_ar="أبحاث البناء الضوئي والتقنية الحيوية",
        references=("Yu et al. (2015) Sci Rep 5:8132",)),
     # ===================== algae =====================
-    _o(key="chlorella", name="Chlorella vulgaris", name_ar="كلوريلا فولغاريس",
+    _o(key="chlorella", strain="culture-collection strains", name="Chlorella vulgaris", name_ar="كلوريلا فولغاريس",
        common="Green microalga", common_ar="طحلب أخضر دقيق",
        group="Green alga (eukaryote, photosynthetic)", group_ar="طحلب أخضر – حقيقي النواة وضوئي",
        ncbi_taxid=3077, lineage=("Eukaryota", "Viridiplantae", "Chlorophyta", "Trebouxiophyceae",
@@ -562,7 +566,7 @@ _LIST = [
        applications="Water quality indicator, forensic diatom tests",
        applications_ar="مؤشر لجودة المياه واختبارات الطب الشرعي",
        references=("Round, Crawford & Mann (1990) The Diatoms",)),
-    _o(key="euglena", name="Euglena gracilis", name_ar="يوغلينا غراسيلس",
+    _o(key="euglena", strain="culture-collection strains (e.g. Z)", name="Euglena gracilis", name_ar="يوغلينا غراسيلس",
        common="Euglenid flagellate", common_ar="سوطي اليوغلينا",
        group="Flagellate protist (mixotroph)", group_ar="أولي سوطي – مختلط التغذية",
        ncbi_taxid=3039, lineage=("Eukaryota", "Discoba", "Euglenozoa", "Euglenida", "Euglenaceae",
@@ -583,7 +587,7 @@ _LIST = [
        applications_ar="تدريس البيولوجيا الضوئية والمكملات الغذائية",
        references=("Buetow (1968) The Biology of Euglena",)),
     # ===================== protists & micro-animals =====================
-    _o(key="tetrahymena", name="Tetrahymena thermophila", name_ar="تيتراهيمينا ثيرموفيلا",
+    _o(key="tetrahymena", strain="SB210", name="Tetrahymena thermophila", name_ar="تيتراهيمينا ثيرموفيلا",
        common="Model ciliate", common_ar="هدبي نموذجي",
        group="Ciliate protist", group_ar="أوّلي هدبي",
        ncbi_taxid=5911, lineage=("Eukaryota", "Sar", "Alveolata", "Ciliophora", "Oligohymenophorea",
@@ -718,7 +722,7 @@ _LIST = [
        applications_ar="أبحاث النجاة من الجفاف والتطور اللاجنسي",
        references=("Gladyshev & Meselson (2008) BMC Evol Biol 8:59",)),
     # ===================== archaea =====================
-    _o(key="methanosarcina", name="Methanosarcina barkeri", name_ar="ميثانوساركينا باركري",
+    _o(key="methanosarcina", strain="Fusaro (DSM 804)", name="Methanosarcina barkeri", name_ar="ميثانوساركينا باركري",
        common="Methane-producing archaeon", common_ar="عتيقة منتجة للميثان",
        group="Archaeon (methanogen)", group_ar="عتائق – منتجة للميثان",
        ncbi_taxid=2208, lineage=("Archaea", "Methanobacteriota", "Methanomicrobia", "Methanosarcinales",
@@ -739,7 +743,7 @@ _LIST = [
        applications_ar="إنتاج الغاز الحيوي وأبحاث دورة الكربون",
        notes=("Only grows in the simulation when oxygen is near zero — try switching aeration off.",),
        references=("Maeder et al. (2006) J Bacteriol 188:7922",)),
-    _o(key="halobacterium", name="Halobacterium salinarum", name_ar="هالوباكتيريوم ساليناروم",
+    _o(key="halobacterium", strain="NRC-1", name="Halobacterium salinarum", name_ar="هالوباكتيريوم ساليناروم",
        common="Salt-loving archaeon", common_ar="عتيقة محبة للملح",
        group="Archaeon (extreme halophile)", group_ar="عتائق – محبة للملوحة الشديدة",
        ncbi_taxid=2242, lineage=("Archaea", "Methanobacteriota", "Halobacteria", "Halobacteriales",

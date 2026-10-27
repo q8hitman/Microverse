@@ -21,9 +21,10 @@ LARGE_FIELD = Field("10× objective", 1500.0, 1000.0, 200.0)
 MAX_DRAWN = 260
 
 
-def cell_mass_mg(size_um: float) -> float:
-    """≈0.09 pg per µm³ of the cube of the longest dimension (a deliberately rough, documented estimate)."""
-    return 0.09 * (size_um ** 3) * 1e-9
+def cell_mass_mg(key: str) -> float:
+    """Dry mass of one drawn unit from its morphology (volume × 0.3 pg/µm³). The community model's biomass is
+    treated as dry mass (its yields are dry-weight yields). v0.4 used 0.09 pg × (longest dimension)³."""
+    return spec_for(key).dry_mass_mg()
 
 
 class CommunityScene(Specimen):
@@ -40,7 +41,7 @@ class CommunityScene(Specimen):
             cell_area = max(spec.length_um * spec.width_um * 0.8 * max(spec.max_chain, 1) ** 0.5, 0.5)
             cap = float(np.clip(share * f.width_um * f.height_um / cell_area, 3.0,
                                 MAX_DRAWN if self.panel_of[i] == "small" else 60))
-            vol, m = f.sampled_volume_ml, cell_mass_mg(o.size_um)
+            vol, m = f.sampled_volume_ml, cell_mass_mg(o.key)
 
             def raw(y, j=NP + i, vol=vol, m=m):
                 return max(y[j], 0.0) * vol / 1000.0 / max(m, 1e-18)

@@ -43,10 +43,11 @@ def test_database_is_complete_and_consistent():
         assert isinstance(o.trait_evidence, Evidence)
 
 
-def test_every_organism_is_biosafety_level_1():
+def test_every_organism_is_low_risk_and_says_classification_is_per_strain():
     for o in ORGANISMS.values():
         text = (o.biosafety + o.name).lower()
-        assert "level 1" in text or "safe food" in text or "harmless" in text, o.key
+        assert ("level 1" in text or "risk group 1" in text or "safe food" in text), o.key
+        assert "harmless" not in text                   # no blanket claims: risk is per strain and jurisdiction
         for danger in ("anthracis", "botulinum", "pestis", "tuberculosis", "o157"):
             assert danger not in o.name.lower()
 

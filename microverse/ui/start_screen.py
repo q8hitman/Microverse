@@ -342,9 +342,9 @@ class LibraryPage(QWidget):
         csvb.clicked.connect(self._export_csv)
         head.addWidget(csvb)
         root.addLayout(head)
-        note = QLabel(L(f"{len(ORGANISMS)} organisms, all biosafety level 1. Every card says what the organism DOES, "
+        note = QLabel(L(f"{len(ORGANISMS)} organisms; their usual teaching/food strains are Risk Group 1 (low risk). Every card says what the organism DOES, "
                         "and how the simulation represents it — so you can look it up any time you forget.",
-                        f"{len(ORGANISMS)} كائناً، كلها من مستوى السلامة الحيوية 1. كل بطاقة توضح وظيفة الكائن "
+                        f"{len(ORGANISMS)} كائناً، وسلالاتها المعتادة في التدريس والغذاء من مجموعة الخطورة 1 (منخفضة الخطورة). كل بطاقة توضح وظيفة الكائن "
                         "وكيف تمثله المحاكاة، فتقدر ترجع لها متى ما نسيت."))
         note.setObjectName("muted")
         note.setWordWrap(True)

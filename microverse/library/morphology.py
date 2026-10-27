@@ -68,6 +68,25 @@ class MorphSpec:
     def aspect(self) -> float:
         return self.width_um / max(self.length_um, 1e-9)
 
+    def volume_um3(self) -> float:
+        """Volume of ONE cell / colony / organism from the typical dimensions (geometric approximation)."""
+        import math
+        L, W = self.length_um, self.width_um
+        if self.shape in ("rod", "club_rod"):                     # cylinder with hemispherical caps
+            return math.pi * (W / 2) ** 2 * max(L - W, 0.0) + 4 / 3 * math.pi * (W / 2) ** 3
+        if self.shape in ("coccus", "sphere", "packet"):
+            return 4 / 3 * math.pi * (L / 2) ** 3
+        if self.shape == "hypha":                                 # one hyphal segment
+            return math.pi * (W / 2) ** 2 * L
+        if self.shape == "coenobium":                             # four ellipsoidal cells
+            return 4 * 4 / 3 * math.pi * (L * 0.375) * (W / 8) ** 2
+        flat = 0.6 if self.shape in ("slipper", "pear", "amoeboid", "boat", "spindle") else 1.0
+        return 4 / 3 * math.pi * (L / 2) * (W / 2) * (W / 2 * flat)
+
+    def dry_mass_mg(self) -> float:
+        """Dry mass of one unit, assuming ≈0.3 pg dry matter per µm³ (cells are ≈70 % water, density ≈1.1)."""
+        return 0.3 * self.volume_um3() * 1e-9
+
     def describe(self) -> tuple[str, str]:
         return MOTILITY.get(self.motility, self.motility), DIVISION.get(self.division, self.division)
 

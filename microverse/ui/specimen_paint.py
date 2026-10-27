@@ -326,8 +326,8 @@ def _sphere(p, a, L, q, look, col, alpha, lw):
 
 def _coenobium(p, a, L, W, q, look, col, alpha, lw):
     cells = 4
-    cw = W * 0.95 / 1.0
-    cl = L
+    cw = W * 0.95
+    cl = L * 0.75
     for layer, (dy, s) in enumerate(((0.0, 1.0), (W * 1.1 * q, q))):
         if s <= 0.02:
             continue
@@ -514,7 +514,7 @@ def _amoeba(p, a, L, W, q, look, col, alpha, lw):
 
 
 def _vorticella(p, a, L, W, q, look, col, alpha, lw):
-    p.rotate(-math.degrees(a.heading) + 90 + 25 * math.sin(a.variant * 6))   # stalks hang from the substrate
+    p.rotate(-math.degrees(a.heading) + 25 * math.sin(a.variant * 6))        # stalk rises from its anchor
     stalk_len = L * 1.8 * (1 - 0.7 * a.contract)
     det = look.detail(col, 0.7 * alpha).darker(150)
     p.setPen(QPen(det, max(0.7, L * 0.025)))
@@ -560,8 +560,7 @@ def _brachionus(p, a, L, W, q, look, col, alpha, lw, eggs):
     body.cubicTo(-w * 0.62, L * 0.05, -w * 0.40, L * 0.32, 0, L * 0.36)
     body.cubicTo(w * 0.40, L * 0.32, w * 0.62, L * 0.05, w / 2, -L * 0.30)
     body.closeSubpath()
-    p.save()
-    p.scale(1, -1)                                                           # head first
+    p.save()                                                                 # anterior (spines) leads
     _fill(p, body, look, col, alpha, lw)
     det = look.detail(col, 0.75 * alpha).darker(150)
     p.setBrush(look.body(col, alpha)[0])

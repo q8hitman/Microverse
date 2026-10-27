@@ -34,23 +34,25 @@ HOWTO_AR = """1. في الشاشة الأولى اختر المختبر، أو �
    ليبيّن من يفيد من ومن يضره، ولماذا.
 5. «تجميد التوقع» يحفظ التوقع نهائياً قبل إجراء التجربة الحقيقية، فلا يمكن تغييره بعدها."""
 
-STATUS_EN = """MicroVerse 0.4
+STATUS_EN = """MicroVerse 0.5
 
 • Verified: the code solves the stated equations (automated tests).
 • NOT validated: no model has been compared with laboratory data yet.
 • Chemostat lab: literature parameters, still to be checked against Fussmann et al. (2000).
 • Yoghurt and Community labs: exploratory. Traits are textbook estimates needing calibration.
-• Microscope views are drawn from the simulated state; positions and motion are illustrative.
-• Every organism in the database is biosafety level 1 (harmless)."""
+• Microscope views: drawn counts follow the simulated state; each drawn cell represents a cohort.
+  Shapes come from the literature; positions, swimming paths and division animations are illustrative.
+• The usual teaching/food strains of every organism are Risk Group 1 in most national lists;
+  classification is per strain and per country."""
 
-STATUS_AR = """MicroVerse 0.4
+STATUS_AR = """MicroVerse 0.5
 
 • متحقق منه رياضياً: الكود يحل المعادلات المذكورة (اختبارات آلية).
 • غير متحقق منه مخبرياً: لم يُقارن أي نموذج ببيانات مختبرية بعد.
 • مختبر الكيموستات: معاملات من الأدبيات وتحتاج مراجعة على ورقة Fussmann وزملائه (2000).
 • مختبرا اللبن والمجتمعات: استكشافيان، والصفات تقديرات من الكتب وتحتاج معايرة.
-• مناظر المجهر مرسومة من الحالة المحسوبة، والمواقع والحركة توضيحية فقط.
-• كل الكائنات في قاعدة البيانات من مستوى السلامة الحيوية 1 (غير ممرضة)."""
+• مناظر المجهر: عدد الخلايا المرسومة يتبع الحالة المحسوبة، وكل خلية تمثل مجموعة. الأشكال من المراجع؛ المواقع ومسارات السباحة وحركات الانقسام توضيحية.
+• السلالات المعتادة لكل الكائنات من مجموعة الخطورة 1 في أغلب القوائم الوطنية؛ التصنيف يعتمد على السلالة والدولة."""
 
 
 class MainWindow(QMainWindow):

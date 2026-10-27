@@ -20,9 +20,9 @@ def guide_html() -> str:
     out = [f"<html><head><style>{css}</style></head><body>"]
     out.append(f"<h1>MicroVerse — {e(L('Organism guide', 'دليل الكائنات'))}</h1>")
     out.append(f"<p class='muted'>{e(L(f'{len(ORGANISMS)} organisms · {len(FUNCTIONS)} functions · generated {date.today()}', f'{len(ORGANISMS)} كائناً · {len(FUNCTIONS)} وظيفة · أُنشئ في {date.today()}'))}<br>"
-               + e(L("All organisms are biosafety level 1. Functions marked 'from traits' are read directly from the "
+               + e(L("The usual teaching/food strains of all organisms are Risk Group 1; classification is per strain and country. Functions marked 'from traits' are read directly from the "
                      "numbers the simulation uses. Traits are textbook estimates and are not yet validated.",
-                     "كل الكائنات من مستوى السلامة الحيوية 1. الوظائف المعلَّمة «من صفاته» مأخوذة مباشرة من الأرقام التي "
+                     "السلالات المعتادة لكل الكائنات من مجموعة الخطورة 1، والتصنيف يعتمد على السلالة والدولة. الوظائف المعلَّمة «من صفاته» مأخوذة مباشرة من الأرقام التي "
                      "تستخدمها المحاكاة. الصفات تقديرات من الكتب وغير متحقق منها مخبرياً بعد.")) + "</p>")
 
     # Part 1: functions
