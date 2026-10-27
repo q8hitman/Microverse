@@ -1,0 +1,58 @@
+# Changelog
+
+## 0.4.0 — 2026-10-27 — What each organism does; two-panel microscope; calmer interface
+- **Function reference** (`microverse/library/functions.py`): 20 functions (primary producer, oxygen producer,
+  lactic/alcohol fermenter, acidifier, decomposer, cross-feeder, aerobic scavenger, bacterial/algal grazer,
+  top predator, grazing-resistant, nitrogen fixer, nitrifier, methanogen, mixotroph, oxygen-sensitive, food starter,
+  model organism, extremophile), each explained in English and Arabic with how the simulation represents it and
+  something to try. 17 are DERIVED FROM THE SIMULATION TRAITS, so the label and the behaviour cannot disagree;
+  3 are assigned by hand and marked as such.
+- **SQLite organism database**: tables `organism_db`, `functions`, `organism_functions` in data/microverse.sqlite,
+  refreshed at every start; `scripts/build_database.py`; CSV export for Excel (Arabic preserved).
+- **Library**: browse By Organism or By Function, search across names/groups/functions/roles, function chips on every
+  card, a "What it does" table per organism; export a printable **organism guide (PDF)** in English or Arabic.
+- **Who's Who** tab in every lab: what each organism in that lab does, and what their traits suggest will happen
+  between them (who eats whom, who feeds whom, who supplies oxygen, whose acid hurts whom, who competes).
+- **Two-panel microscope** in the Community Builder: 100× for cells ≤ 15 µm, 10× for larger organisms, true relative
+  size inside each panel, its own scale bar, and a readable legend on a solid plate below the images.
+- **Interface** (Vercel interface guidelines + graphic-design skill): parameter groups for organism traits start
+  folded; visible keyboard focus; cards reachable with Tab/Enter; confirmation before the irreversible "freeze";
+  friendly error messages with details on demand; Arabic mirrors the whole layout (right-to-left).
+- Tests: 76 total (22 new for functions, database, CSV and guide).
+
+## 0.3.0 — 2026-10-27 — Organism database, Community Builder, Arabic
+- **Organism database** (`microverse/library/organisms.py`): 30 biosafety-level-1 organisms — lactic acid bacteria,
+  acetic acid bacteria, Bacillus, E. coli K-12, Pseudomonas, Azotobacter, Nitrosomonas, cyanobacteria, archaea
+  (methanogen, halophile), yeasts, moulds, algae, a diatom, ciliates, an amoeba, a flagellate and rotifers.
+  Each record carries BOTH the descriptive card (bilingual) and the physiological traits the simulation uses.
+- **Community Builder lab**: pick 2–5 organisms (or one of 9 presets); the equations are assembled from their traits.
+  Competition, predation, cross-feeding, acid inhibition, oxygen coupling and nutrient recycling all emerge.
+- **Interaction analysis**: re-runs each organism alone and each pair together, classifies the interaction from the
+  measured effects, and explains the mechanism from the traits.
+- **Arabic**: language switch in the start screen. Predictions, explanations, organism cards, scenarios, outcomes and
+  most of the interface are bilingual; the explanation panel renders right-to-left. (Individual parameter names are
+  still English.)
+- **Clearer interface**: Help → "How to use MicroVerse", tooltips on every button, grouped parameters, a microscope
+  view that states its own concentration factors, and a "Why?" panel that says everything is computed, not stored.
+- Model fixes found by testing: organisms outside their limits now die instead of freezing; photoautotrophs are not
+  oxygen-gated; sealed vessels start purged; oxygen cannot supersaturate; nitrogen limitation is smooth.
+- Tests: 54 total (21 new for the database, community model and interactions).
+
+## 0.2.0 — 2026-10-27 — Start screen, organism library, yoghurt lab
+- Start screen: choose a lab → see its organisms → choose a scenario (research question) → start. Planned modules listed as "coming next".
+- Organism library: bilingual (English/Arabic) cards with classification, NCBI Taxonomy ID, size, shape, metabolism, reproduction, role, model variables, biosafety, references; drawn portraits.
+- Lab framework (`microverse/labs/`): each lab bundles model, organisms, scenarios, parameter groups, plots, explanation, scan, scene.
+- New model `yogurt` v1.0.0 (exploratory): CTMI/CPM cardinal growth, protocooperation (peptides/formate), Luedeking–Piret acid, lactose→lactate+galactose stoichiometry, charge-balance pH of milk. Explanation engine, temperature scan, Gram-stain smear + jar/pH-meter view.
+- Chemostat lab: 7 scenarios (cycles, damped, stable, rotifer extinction, washout, paradox of enrichment, stochastic small vessel).
+- UI: new workspace (header with question and prediction, grouped parameters with evidence dots, multiple linked plots, organisms and model tabs), dark stylesheet, chart colours checked with the dataviz palette validator.
+- Sensitivity now accepts any output metric; 11 new tests (33 total).
+
+## 0.1.0 — 2026-10-27 — Milestone 1
+- Architecture & feasibility assessment (`docs/ARCHITECTURE.md`), M1 spec, model doc, verification-vs-validation doc, roadmap.
+- Core: `Parameter`/`Source`/`Evidence` provenance, `Model` contract, `RunConfig` + SHA-256 hash, `Trajectory`, scheduler (LSODA, tau-leaping with exact extinction).
+- Model `chemostat_rotifer` v1.0.0 (Fussmann et al. 2000) with analytic equilibria, analytic Jacobian, 9-channel stochastic formulation.
+- Analysis: regime classification (linear stability), explanation engine, elasticities, δ regime scan, oscillation period.
+- Data: SQLite schema with append-only predictions (triggers), seeding of parameters/sources/organisms; experiment JSON files.
+- Visualization: state-driven microscope scene (Poisson-tracked counts, eggs from R/B, culture tint from C) and Qt painter.
+- UI: parameter panel with evidence badges, live plot + playback, regime-scan tab, explanation panel, sensitivity, freeze prediction, open/save/export.
+- Tests: 22 pytest verification tests; `scripts/ui_smoke.py` screenshot smoke test.
