@@ -13,7 +13,7 @@ Status keys: ✅ implemented & tested · 🟡 partial · ⏳ planned · 🔬 val
 - ✅ Start screen, scenario picker, bilingual organism library, lab framework (v0.2)
 - ✅ Organism trait database (30 BSL-1 organisms), Community Builder, interaction analysis, Arabic UI (v0.3)
 - ✅ Prediction vs Reality: freeze ✅, import CSV ✅, compare and metrics ✅, report ✅ (v0.5); calibration → new prediction ✅ (v0.5.1)
-- ⏳ School / Research mode switch (same engine, different panels)
+- ✅ School / Research mode switch (same engine, same numbers; School hides advanced controls) (v0.5.2)
 - ✅ Replicate runner for stochastic mode (extinction probability with Wilson CI) (v0.5)
 - ✅ Continuous microscope: persistent identities, organism-specific division and motility, 3 view modes (v0.5)
 
@@ -40,7 +40,7 @@ Status keys: ✅ implemented & tested · 🟡 partial · ⏳ planned · 🔬 val
 2. First real data set: yoghurt pH and counts → Prediction vs Reality → Calibrate on that data set → test the
    new prediction on a second, different data set (the tools for every step exist since v0.5.1).
 3. Agar: real branched colonies need a finer grid or a different growth rule (see docs/models/agar.md);
-   colony sizes are 3–5× too large for the assumed clock, so plates crowd at lower counts than real plates.
+   colony sizes are still ≈2–3× too large after a day (v0.5.2: plausible appearance times on spread plates; was 3–5×), so plates crowd at lower counts than real plates.
 4. Microscope: spatial structure only when a spatial model drives it; per-species tuning after the live review.
 5. Arabic terminology review by a native-speaking microbiologist.
 6. Spatial grid for the cell-separation step if drawing caps are raised.

@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.5.2 — 2026-10-27 — School / Research mode; colonies start from a few cells
+- **School / Research mode** (start screen, next to the language): School mode hides the advanced controls (organism
+  traits, random seed and vessel volume, replicates, sensitivity, calibration, hashes) and says so. Same engine, same
+  numbers: a run's configuration hash is identical in both modes (tested). Research mode (default) is unchanged.
+- **Agar: a spread-plate colony now starts from a few cells.** Before, each plated founder was 2 % of a full colony
+  spread over ≈2 mm, so colonies were visible within an hour and already ≈6 mm across. Now a founder is ≈4 cells in
+  one grid square (`ONE_CELL` ≈ 3×10⁻⁹ of full density, an assumed scale uncertain by ≈10×), so colonies appear after
+  ≈25 doublings: with default settings E. coli ≈10 h, yeast ≈26 h, mould ≈38 h (illustrative, not calibrated per
+  organism). Spread-plate E. coli at 12/24/48 h: 1.9/6.6/15 mm (was 8.4/11.9/18.4; real ≈1/2–3/4–6 mm), so the size
+  error after a day falls from 3–5× to ≈2–3×. Rules that would slow the front further made colonies grow square on
+  this grid and were rejected (docs/models/agar.md). Spot mode still starts from a dense, visible drop.
+- Agar page: the incubation time suggests the organism's usual time (24 h bacteria, 48 h yeast, 72 h mould, plus the
+  second organism's delay), so slow organisms do not show an empty plate; a duration the user types is kept.
+- Second Codex review of this work found 4 issues, all fixed: switching mode rebuilt the pages and lost imported
+  data and settings (now applied in place); School mode hid experimenter controls that are not marked "control"
+  (now whole experimenter groups stay); the suggested incubation overwrote the user's duration and ignored the delay;
+  the docs called the appearance times realistic without saying the density scale is assumed.
+- Tests: two-organism and yeast-in-acid plates run longer (yeast needs ≈1 day to appear); school-mode, mode-switch
+  and incubation tests added.
+
 ## 0.5.1 — 2026-10-27 — Calibration; two organisms and lactic acid on agar
 - **Calibration → new prediction** (Prediction vs Reality, step 5; `analysis/calibration.py`): fit up to five
   parameters to the imported data set (bounded weighted least squares, log scale for rates), with linearised

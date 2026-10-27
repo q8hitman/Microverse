@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (QButtonGroup, QFrame, QComboBox, QDoubleSpinBox, 
 
 from ..analysis.interactions import analyse
 from ..analysis.sensitivity import elasticities
-from ..i18n import L, group as G, param_name, t as T, tr
+from ..i18n import L, group as G, is_school, param_name, t as T, tr
 from ..core.parameters import Evidence
 from ..core.scheduler import run
 from ..core.trajectory import RunConfig
@@ -78,6 +78,8 @@ class Workspace(QWidget):
         self._explain_dirty = True
         self.scene = lab.make_scene(1)
         self.spins: dict[str, QDoubleSpinBox] = {}
+        self._groups: list[tuple[QGroupBox, QPushButton, bool]] = []    # (group, fold button, has a control)
+        self.rep_tab = None
 
         root = QVBoxLayout(self)
         root.setContentsMargins(8, 6, 8, 6)
@@ -96,6 +98,25 @@ class Workspace(QWidget):
         self.explain_timer = QTimer(self, interval=300, timeout=self._refresh_explanation)
         self.explain_timer.start()
         self.apply_scenario(scenario)
+        self.apply_audience()
+
+    def apply_audience(self):
+        """School / Research: show or hide the advanced controls in place. Nothing is rebuilt or reset, and every
+        value keeps taking part in the run (school mode only hides)."""
+        school = is_school()
+        self.school_note.setVisible(school)
+        for grp, toggle, has_control in self._groups:
+            # groups with an experimenter control (dilution, temperature, lactose…) stay, whole; organism traits go
+            grp.setVisible(has_control or not school)
+            if school and has_control:
+                toggle.setChecked(True)
+        self.legend.setVisible(not school)
+        self.sim_form.setRowVisible(self.seed, not school)
+        self.sim_form.setRowVisible(self.volume, not school)
+        self.hash_lbl.setVisible(not school)
+        if self.rep_tab is not None:
+            self.center_tabs.setTabVisible(self.rep_tab, not school)
+        self.btn_sens.setVisible(not school)
 
     # ------------------------------------------------------------------ UI
     def _header(self):
@@ -137,12 +158,20 @@ class Workspace(QWidget):
         lay.addWidget(sc)
 
         params = self.model.default_parameters().params
+        self.school_note = QLabel(L("School mode: organism traits stay at their textbook values. Switch to Research mode "
+                                    "on the start screen to change them.",
+                                    "وضع المدرسة: صفات الكائنات تبقى على قيمها من الكتب. للتعديل عليها اختر «وضع البحث» "
+                                    "من الشاشة الأولى."))
+        self.school_note.setWordWrap(True)
+        self.school_note.setStyleSheet(f"color:{TEXT_2}; font-size:8pt")
+        lay.addWidget(self.school_note)
         for title, syms in self.lab.param_groups:
             controlled = all(params[x].evidence == Evidence.CONTROL for x in syms)
+            has_control = any(params[x].evidence == Evidence.CONTROL for x in syms)
             grp = QGroupBox()
             gl = QVBoxLayout(grp)
             gl.setContentsMargins(6, 4, 6, 4)
-            toggle = QPushButton(("▾  " if controlled else "▸  ") + G(title))
+            toggle = QPushButton(("▾  " if controlled else "▸  ") + G(title).replace("&", "&&"))   # "&" would become a shortcut mark
             toggle.setObjectName("fold")
             toggle.setCheckable(True)
             toggle.setChecked(controlled)
@@ -153,7 +182,7 @@ class Workspace(QWidget):
             form.setContentsMargins(0, 2, 0, 2)
             form.setLabelAlignment(Qt.AlignLeft)
             body.setVisible(controlled)
-            toggle.toggled.connect(lambda on, b=body, t=toggle, n=G(title): (b.setVisible(on),
+            toggle.toggled.connect(lambda on, b=body, t=toggle, n=G(title).replace("&", "&&"): (b.setVisible(on),
                                                                               t.setText(("▾  " if on else "▸  ") + n)))
             gl.addWidget(toggle)
             gl.addWidget(body)
@@ -175,7 +204,8 @@ class Workspace(QWidget):
                 form.addRow(name, sp)
                 self.spins[sym] = sp
             lay.addWidget(grp)
-        legend = QLabel(L("Dot colour = how trustworthy the value is: ", "لون النقطة = مدى موثوقية القيمة: ") + "  ".join(
+            self._groups.append((grp, toggle, has_control))
+        legend = self.legend = QLabel(L("Dot colour = how trustworthy the value is: ", "لون النقطة = مدى موثوقية القيمة: ") + "  ".join(
             f"<span style='color:{EVIDENCE_COLOURS[e]}'>●</span> {tr(EVIDENCE_TEXT[e])}"
             for e in (Evidence.CONTROL, Evidence.LITERATURE_ESTIMATE, Evidence.ASSUMED, Evidence.MEASURED)))
         legend.setWordWrap(True)
@@ -205,6 +235,7 @@ class Workspace(QWidget):
             for wdg in (self.rb_sto, self.seed, self.volume):
                 wdg.setEnabled(False)
             self.rb_sto.setText(L("Stochastic (not needed: populations are huge)", "عشوائي (غير ضروري: الأعداد ضخمة)"))
+        self.sim_form = f2
         lay.addWidget(sim)
 
         actions = QGroupBox(L("Experiment", "التجربة"))
@@ -230,7 +261,7 @@ class Workspace(QWidget):
         return scroll
 
     def _center(self):
-        tabs = QTabWidget()
+        tabs = self.center_tabs = QTabWidget()
         live = QWidget()
         v = QVBoxLayout(live)
         v.setContentsMargins(4, 4, 4, 4)
@@ -369,7 +400,7 @@ class Workspace(QWidget):
             self.rep_text = QLabel()
             self.rep_text.setWordWrap(True)
             rl.addWidget(self.rep_text)
-            tabs.addTab(rep, L("Replicates", "التكرارات"))
+            self.rep_tab = tabs.addTab(rep, L("Replicates", "التكرارات"))
 
         orgs = QWidget()
         ov = QVBoxLayout(orgs)
@@ -406,7 +437,7 @@ class Workspace(QWidget):
                                         "يفيد من ومن يضره."))
             self.btn_inter.clicked.connect(self._run_interactions)
             btns.addWidget(self.btn_inter)
-        b1 = QPushButton(L(f"📊 Sensitivity: {self.lab.sensitivity_label}", "📊 الحساسية"))
+        b1 = self.btn_sens = QPushButton(L(f"📊 Sensitivity: {self.lab.sensitivity_label}", "📊 الحساسية"))
         b1.setToolTip(L("Changes each parameter by ±5% and reports how much the outcome moves.",
                         "يغيّر كل معامل بنسبة ±5% ويوضح مقدار تغير النتيجة."))
         b1.clicked.connect(self._run_sensitivity)

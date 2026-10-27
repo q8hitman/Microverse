@@ -104,7 +104,7 @@ thread. The target GPU is not used (QPainter is CPU), and does not need to be at
    `library/morphology.py` and `_pressure_duration` in `viz/population.py`.
 2. Import the first real yoghurt data set (pH every 15–30 min and selective counts) in Prediction vs Reality,
    calibrate on it (new prediction), and test that prediction on a second, different data set.
-3. Agar: colonies are 3–5× too large for the assumed clock, and thin branches are not reproduced (grid too coarse);
+3. Agar: spread-plate colonies appear at plausible times since v0.5.2 but are still ≈2–3× too large after a day, and thin branches are not reproduced (grid too coarse);
    see docs/models/agar.md for what each would need.
 4. Microscope: spatial structure only if a spatial model drives it; per-species tuning after the live review.
 5. Arabic: review the translations with a native-speaking microbiologist (terminology).

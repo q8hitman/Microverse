@@ -7,7 +7,7 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
                                QPushButton, QScrollArea, QVBoxLayout, QWidget)
 
-from ..i18n import L, is_ar, tr
+from ..i18n import L, is_ar, is_school, tr
 from ..labs import PLANNED, community_lab, fixed_labs
 from ..labs.base import Lab, Scenario
 from ..labs.community import PRESETS
@@ -58,6 +58,7 @@ class StartScreen(QWidget):
     open_reality = Signal()
     open_agar = Signal()
     lang_changed = Signal(str)
+    mode_changed = Signal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -82,6 +83,16 @@ class StartScreen(QWidget):
         self.lang.setCurrentIndex(1 if is_ar() else 0)
         self.lang.currentIndexChanged.connect(lambda i: self.lang_changed.emit(self.lang.itemData(i)))
         head.addWidget(self.lang, 0, Qt.AlignTop)
+        self.mode = QComboBox()
+        self.mode.addItem(L("Research mode", "وضع البحث"), "research")
+        self.mode.addItem(L("School mode", "وضع المدرسة"), "school")
+        self.mode.setCurrentIndex(1 if is_school() else 0)
+        self.mode.setToolTip(L("School mode hides the advanced controls (organism traits, random seed, replicates, "
+                               "sensitivity, calibration). The model and its numbers are exactly the same.",
+                               "وضع المدرسة يخفي الأدوات المتقدمة (صفات الكائنات، البذرة العشوائية، التكرارات، الحساسية، "
+                               "المعايرة). النموذج وأرقامه نفسها تماماً."))
+        self.mode.currentIndexChanged.connect(lambda i: self.mode_changed.emit(self.mode.itemData(i)))
+        head.addWidget(self.mode, 0, Qt.AlignTop)
         self.lib_btn = QPushButton()
         self.lib_btn.clicked.connect(self.open_library)
         head.addWidget(self.lib_btn, 0, Qt.AlignTop)

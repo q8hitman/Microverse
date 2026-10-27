@@ -78,6 +78,7 @@ class MainWindow(QMainWindow):
         self.start.start.connect(self.open_lab)
         self.start.open_library.connect(lambda: self.stack.setCurrentWidget(self.library))
         self.start.lang_changed.connect(self.change_language)
+        self.start.mode_changed.connect(self.change_mode)
         self.start.open_reality.connect(self.open_reality)
         self.start.open_agar.connect(self.open_agar)
         self.reality = None
@@ -108,6 +109,17 @@ class MainWindow(QMainWindow):
             self.workspace = None
         self._build()
         self._menu()
+
+    def change_mode(self, code: str):
+        """School / Research: open pages hide or show their advanced controls in place, so imported data,
+        comparisons, plates and edited settings are kept."""
+        i18n.set_mode(code)
+        self.start.mode.blockSignals(True)
+        self.start.mode.setCurrentIndex(self.start.mode.findData(i18n.MODE))
+        self.start.mode.blockSignals(False)
+        for page in (self.workspace, self.reality):
+            if page is not None:
+                page.apply_audience()
 
     def open_lab(self, lab, scenario):
         if self.workspace is not None:

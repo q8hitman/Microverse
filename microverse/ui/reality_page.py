@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (QComboBox, QDoubleSpinBox, QFileDialog, QFormLayo
 from ..analysis import calibration as C
 from ..analysis import reality as R
 from ..data import db
-from ..i18n import L, is_ar
+from ..i18n import L, is_ar, is_school
 
 ROOT = Path(__file__).resolve().parents[2]
 EXAMPLE = ROOT / "data" / "examples"
@@ -143,6 +143,7 @@ class RealityPage(QWidget):
         split.setSizes([460, 900])
         root.addWidget(split, 1)
         self.refresh()
+        self.apply_audience()
 
     # ------------------------------------------------------------------ predictions
     def refresh(self):
@@ -236,6 +237,9 @@ class RealityPage(QWidget):
             j = var.findData(col)
             if j >= 0:
                 var.setCurrentIndex(j)
+
+    def apply_audience(self):
+        self.btn_calib.setVisible(not is_school())       # calibration is a research tool
 
     def _invalidate(self, *_):
         """Any input changed: the shown comparison no longer matches it, so it cannot be saved."""

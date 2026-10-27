@@ -111,3 +111,84 @@ def test_changing_inputs_after_compare_blocks_a_stale_save(app, tmp_path, monkey
     assert page.btn_save.isEnabled()
     page.pred_combo.setCurrentIndex((page.pred_combo.currentIndex() + 1) % page.pred_combo.count())
     assert not page.results and not page.btn_save.isEnabled()   # another prediction selected
+
+
+def test_school_mode_hides_advanced_controls_but_runs_the_same_model(app):
+    from microverse import i18n
+    from microverse.ui.main_window import MainWindow
+    from microverse.ui.workspace import Workspace
+    lab = labs()[0]
+    sc = lab.scenarios[0]
+    research = Workspace(lab, sc)
+    try:
+        i18n.set_mode("school")
+        school = Workspace(lab, sc)
+        if lab.supports_stochastic:                                          # hidden, not removed
+            assert research.center_tabs.isTabVisible(research.rep_tab)
+            assert not school.center_tabs.isTabVisible(school.rep_tab)
+        assert set(school.spins) == set(research.spins)                     # nothing removed, only hidden
+        assert school.current_config().hash() == research.current_config().hash()
+        assert any(not s.isVisibleTo(school) for s in school.spins.values()) or not lab.param_groups
+        w = MainWindow()
+        w.change_mode("research")
+        assert not i18n.is_school() and w.start.mode.currentData() == "research"
+        for x in (school, w):
+            x.deleteLater()
+    finally:
+        i18n.set_mode("research")
+        research.deleteLater()
+
+
+def test_switching_mode_keeps_open_work(app, tmp_path, monkeypatch):
+    """The mode only hides or shows controls: open pages, imported data and edited values survive the switch."""
+    from microverse import i18n
+    from microverse.data import db
+    from microverse.labs import get
+    from microverse.ui import reality_page
+    from microverse.ui.main_window import MainWindow
+    monkeypatch.setattr(reality_page, "EXAMPLE", tmp_path)
+    lab = get("yogurt")
+    con = db.connect()
+    cfg = lab.config({}, t_end=10.0)
+    db.freeze_prediction(con, cfg, {"lab": "yogurt", "scenario": "classic", "outcome": "x"}, "ui",
+                         db.save_experiment(con, "ui", cfg))
+    w = MainWindow()
+    try:
+        w.open_lab(lab, lab.scenarios[0])
+        ws = w.workspace
+        ws.spins["Lac0"].setValue(ws.spins["Lac0"].value() * 0.8)          # an experimenter control, not "CONTROL"
+        edited = ws.spins["Lac0"].value()
+        w.open_reality()
+        page = w.reality
+        page._example()
+        page._compare()
+        w.show()
+        w.change_mode("school")
+        assert w.workspace is ws and w.reality is page                    # nothing rebuilt
+        assert page.results and page.btn_save.isEnabled() and page.btn_calib.isHidden()
+        assert ws.spins["Lac0"].value() == edited
+        app.processEvents()
+        w.stack.setCurrentWidget(ws)
+        app.processEvents()
+        assert ws.spins["Lac0"].isVisibleTo(ws) and ws.spins["T"].isVisibleTo(ws)   # whole process group stays
+        assert not ws.spins["muS"].isVisibleTo(ws)                                  # organism trait hidden
+        w.change_mode("research")
+        assert not page.btn_calib.isHidden() and not ws.spins["muS"].parentWidget().parentWidget().isHidden()
+    finally:
+        i18n.set_mode("research")
+        __import__("PySide6.QtCore", fromlist=["QThreadPool"]).QThreadPool.globalInstance().waitForDone()
+        w.deleteLater()
+
+
+def test_suggested_incubation_never_overrides_the_users_choice(app):
+    from microverse.ui.agar_page import AgarPage
+    a = AgarPage()
+    a.org.setCurrentIndex(a.org.findData("scerevisiae"))
+    assert a.tend.value() == 48
+    a.org2.setCurrentIndex(a.org2.findData("aoryzae"))
+    a.delay.setValue(10)
+    assert a.tend.value() == 10 + 72                                       # the second organism's delay counts
+    a.tend.setValue(96)                                                    # the user decides
+    a.org.setCurrentIndex(a.org.findData("ecoli"))
+    a.delay.setValue(48)
+    assert a.tend.value() == 96

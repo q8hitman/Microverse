@@ -18,6 +18,19 @@ def L(en: str, ar: str) -> str:
     return ar if LANG == "ar" else en
 
 
+# --- audience: "research" shows every control; "school" hides the advanced ones (same engine, same numbers) ---
+MODE = "research"
+
+
+def set_mode(code: str) -> None:
+    global MODE
+    MODE = "school" if code == "school" else "research"
+
+
+def is_school() -> bool:
+    return MODE == "school"
+
+
 def rtl(text: str) -> str:
     """Wrap in a right-to-left block when Arabic is active (for HTML)."""
     return f"<div dir='rtl' style='text-align:right'>{text}</div>" if LANG == "ar" else text
