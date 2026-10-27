@@ -436,6 +436,14 @@ class Workspace(QWidget):
         intro.setWordWrap(True)
         intro.setStyleSheet(f"color:{TEXT_2}; font-size:8pt")
         v.addWidget(intro)
+        self.graph = None
+        if len(self.lab.organisms) >= 2:
+            from .interaction_graph import InteractionGraph
+            self.graph = InteractionGraph(tuple(self.lab.organisms))
+            self.graph.setToolTip(L("Arrows: what the traits SUGGEST. Lines below: what “Measure interactions” "
+                                    "actually found in the simulation.",
+                                    "الأسهم: ما توحي به الصفات. الأسطر تحتها: ما وجده «قياس التفاعلات» فعلاً في المحاكاة."))
+            v.addWidget(self.graph)
         for k in self.lab.organisms:
             o = ORGANISMS[k]
             row = QFrame()
@@ -658,6 +666,8 @@ class Workspace(QWidget):
     def _inter_done(self, token, result):
         self.btn_inter.setEnabled(True)
         self.inter = result[0]
+        if getattr(self, "graph", None) is not None:
+            self.graph.set_measured(self.inter)
         self._show_outcome()
         self._refresh_explanation(force=True)
 
