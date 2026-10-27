@@ -155,7 +155,7 @@ class PlateView(QWidget):
         p.setPen(QPen(QColor(230, 230, 230), 3))                              # 10 mm scale bar
         p.drawLine(QPointF(r.right() - 10 * k, r.bottom() + 14), QPointF(r.right(), r.bottom() + 14))
         p.setFont(QFont("Segoe UI", 8))
-        p.drawText(QRectF(r.right() - 10 * k - 20, r.bottom() + 16, 10 * k + 40, 14), Qt.AlignCenter, "10 mm")
+        p.drawText(QRectF(r.right() - 10 * k - 20, r.bottom() + 16, 10 * k + 40, 14), Qt.AlignCenter, L("10 mm", "10 مم"))
         p.setPen(QColor("#e6edf3"))
         p.drawText(QRectF(r.x(), r.y() - 22, side, 18), Qt.AlignLeft | Qt.AlignVCenter,
                    L(f"t ≈ {self.run.times[self.i] * HOURS_PER_UNIT:.0f} h (assumed clock) · 90 mm dish",
@@ -237,15 +237,15 @@ class AgarPage(QWidget):
         f2.addRow(L("Culture density", "كثافة المزرعة"), self.dens)
         self.dil = QSpinBox(minimum=0, maximum=10, value=6, prefix="10^-")
         f2.addRow(L("Dilution plated", "التخفيف المزروع"), self.dil)
-        self.vol = QDoubleSpinBox(decimals=2, minimum=0.01, maximum=1.0, singleStep=0.05, value=0.1, suffix=" mL")
+        self.vol = QDoubleSpinBox(decimals=2, minimum=0.01, maximum=1.0, singleStep=0.05, value=0.1, suffix=L(" mL", " مل"))
         f2.addRow(L("Volume spread", "الحجم المنشور"), self.vol)
         self.mix = QSpinBox(minimum=1, maximum=99, value=50, suffix=" %")
         self.mix.setToolTip(L("Share of the plated cells that are the second organism.",
                               "نسبة الخلايا المزروعة التي تتبع الكائن الثاني."))
         f2.addRow(L("Second organism share", "نسبة الكائن الثاني"), self.mix)
-        self.gap = QDoubleSpinBox(decimals=0, minimum=4, maximum=60, singleStep=2, value=16, suffix=" mm")
+        self.gap = QDoubleSpinBox(decimals=0, minimum=4, maximum=60, singleStep=2, value=16, suffix=L(" mm", " مم"))
         f2.addRow(L("Distance between spots", "المسافة بين النقطتين"), self.gap)
-        self.delay = QSpinBox(minimum=0, maximum=200, value=0, suffix=" h")
+        self.delay = QSpinBox(minimum=0, maximum=200, value=0, suffix=L(" h", " ساعة"))
         self.delay.setToolTip(L("Add the second organism this long after the first (a deferred test: the first one "
                                 "has time to grow and release acid before its neighbour arrives).",
                                 "أضف الكائن الثاني بعد هذه المدة من الأول (اختبار مؤجَّل: يجد الأول وقتاً لينمو ويطلق "
@@ -260,7 +260,7 @@ class AgarPage(QWidget):
         lv.addWidget(g2)
         g3 = QGroupBox(L("Incubation", "الحضانة"))
         f3 = QFormLayout(g3)
-        self.tend = QSpinBox(minimum=6, maximum=1500, value=24, suffix=" h")
+        self.tend = QSpinBox(minimum=6, maximum=1500, value=24, suffix=L(" h", " ساعة"))
         f3.addRow(L("Incubate for", "مدة الحضانة"), self.tend)
         self.seed = QSpinBox(minimum=0, maximum=99999, value=1)
         f3.addRow(L("Random seed", "البذرة العشوائية"), self.seed)

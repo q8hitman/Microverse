@@ -160,7 +160,7 @@ class CalibrationDialog(QDialog):
             p = self.plots.addPlot(row=k, col=0, title=L(o.label, o.label_ar))
             p.setLogMode(y=o.log)
             p.showGrid(x=True, y=True, alpha=0.15)
-            p.setLabel("bottom", "time", unit_t)
+            p.setLabel("bottom", L("time", "الزمن"), unit_t)
             p.setLabel("left", o.unit)
             p.getAxis("left").enableAutoSIPrefix(False)
             p.addLegend(offset=(-8, 8))
@@ -185,7 +185,7 @@ class CalibrationDialog(QDialog):
             ci = "–" if p.ci_low is None else f"{p.ci_low:.3g} – {p.ci_high:.3g}"
             flag = " ⚠" if p.at_limit else ""
             out.append(f"<tr><td>{html.escape(param_name(p))} ({p.symbol})</td><td>{p.start:.3g}</td>"
-                       f"<td><b>{p.value:.3g}</b>{flag}</td><td>{ci}</td><td>{html.escape(p.unit)}</td></tr>")
+                       f"<td><b>{p.value:.3g}</b>{flag}</td><td>{ci}</td><td dir='ltr'>{html.escape(p.unit)}</td></tr>")
         out.append("</table>")
         out.append("<p>" + L("Error on this data set (RMSE): ", "الخطأ على هذه البيانات (RMSE): ") + " · ".join(
             f"{html.escape(L(o.label, o.label_ar))} {mb.rmse:.3g} → <b>{ma.rmse:.3g}</b>{' (log10)' if o.log else ''}"

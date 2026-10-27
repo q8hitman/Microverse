@@ -103,7 +103,7 @@ class RealityPage(QWidget):
         tr_row.addWidget(self.time_col, 1)
         tr_row.addWidget(self.time_unit)
         self.map_form.addRow(L("Time column", "عمود الزمن"), tr_row)
-        self.offset = QDoubleSpinBox(decimals=2, minimum=-1e4, maximum=1e4, suffix=" h")
+        self.offset = QDoubleSpinBox(decimals=2, minimum=-1e4, maximum=1e4, suffix=L(" h", " ساعة"))
         self.offset.setToolTip(L("If your first measurement was not taken at the simulation's time 0, enter when it was.",
                                  "إذا لم يكن أول قياس عند الزمن صفر في المحاكاة، أدخل متى كان."))
         self.map_form.addRow(L("First measurement at", "أول قياس عند"), self.offset)
@@ -297,7 +297,7 @@ class RealityPage(QWidget):
             p = self.plots.addPlot(row=k, col=0, title=L(o.label, o.label_ar))
             p.setLogMode(y=o.log)
             p.showGrid(x=True, y=True, alpha=0.15)
-            p.setLabel("bottom", "time", unit_t)
+            p.setLabel("bottom", L("time", "الزمن"), unit_t)
             p.setLabel("left", o.unit)
             p.getAxis("left").enableAutoSIPrefix(False)
             p.addLegend(offset=(-8, 8))
@@ -322,7 +322,7 @@ class RealityPage(QWidget):
             r2 = "–" if m.r2 is None else f"{m.r2:.3f}"
             parts.append(f"<tr><td>{html.escape(L(o.label, o.label_ar))}{' (log10)' if o.log else ''}</td><td>{m.n}</td>"
                          f"<td>{m.rmse:.3g}</td><td>{m.bias:+.3g}</td><td>{m.nrmse * 100:.0f}%</td><td>{r2}</td>"
-                         f"<td>{m.shift + 0.0:+.3g} {unit_t}</td></tr>")
+                         f"<td dir='ltr'>{m.shift + 0.0:+.3g} {unit_t}</td></tr>")
         parts.append("</table>")
         for o, s, m, _p in self.results:
             parts.append("<ul>" + "".join(f"<li>{html.escape(x)}</li>" for x in R.explain(m, o, unit_t, ar)) + "</ul>")
