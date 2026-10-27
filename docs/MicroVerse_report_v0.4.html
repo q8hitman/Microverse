@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>تقرير MicroVerse 0.4</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm; }
+  :root { --ink:#1b1f24; --ink2:#57606a; --line:#d0d7de; --accent:#0b5cad; --soft:#f3f6f9; }
+  body { font-family: "Segoe UI", Tahoma, Arial, sans-serif; color: var(--ink); background:#fff;
+         font-size: 10.5pt; line-height: 1.7; margin: 0; }
+  h1 { font-size: 22pt; margin: 0 0 2px; color: var(--accent); }
+  .byline { color: var(--ink2); font-size: 9.5pt; margin-bottom: 14px; }
+  .lead { background: var(--soft); border-right: 4px solid var(--accent); padding: 10px 14px; border-radius: 4px; }
+  h2 { font-size: 14pt; margin: 22px 0 6px; padding-bottom: 3px; border-bottom: 1px solid var(--line); break-after: avoid; }
+  p { margin: 6px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 9.5pt; break-inside: auto; }
+  th, td { border: 1px solid var(--line); padding: 5px 7px; text-align: right; vertical-align: top; }
+  th { background: var(--soft); font-weight: 600; }
+  tr { break-inside: avoid; }
+  .en { direction: ltr; unicode-bidi: isolate; font-style: italic; }
+  .num { direction: ltr; unicode-bidi: isolate; }
+  .tag { display:inline-block; font-size: 8.5pt; padding: 0 6px; border-radius: 8px; background:#e7f1fb; color:#0b4f94; }
+  .tag.man { background:#f9eeda; color:#7a4b00; }
+  ul, ol { margin: 4px 0; padding-right: 20px; }
+  li { margin: 2px 0; }
+  .ok { color:#1a7f37; font-weight:600; } .no { color:#b42318; font-weight:600; }
+  .small { color: var(--ink2); font-size: 9pt; }
+  @media screen { body { max-width: 860px; margin: 0 auto; padding: 24px 16px; } table { display: block; overflow-x: auto; } }
+  @media screen and (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink:#e6edf3; --ink2:#9da7b3; --line:#30363d; --accent:#58a6ff; --soft:#161b22; } :root:not([data-theme="light"]) body { background:#0d1117; } }
+  :root[data-theme="dark"] { --ink:#e6edf3; --ink2:#9da7b3; --line:#30363d; --accent:#58a6ff; --soft:#161b22; }
+  :root[data-theme="dark"] body { background:#0d1117; }
+</style>
+</head>
+<body>
+
+<h1>تقرير MicroVerse 0.4</h1>
+<div class="byline">27 أكتوبر 2026 · إعداد: عبدالله (abdullaq8965) · للنقاش مع د. زهراء</div>
+
+<p class="lead">MicroVerse برنامج سطح مكتب مجاني يعمل بدون إنترنت، يحاكي الكائنات الدقيقة ويتوقع سلوكها ويشرح السبب.
+النسخة 0.4 فيها <b>3 مختبرات</b> و<b>30 كائناً آمناً</b> (مستوى السلامة الحيوية 1) و<b>20 وظيفة موثّقة</b>، وكل الاختبارات الآلية الـ 76 ناجحة.
+<b>لم يُقارن أي نموذج ببيانات مختبرية بعد</b>، فالنتائج توقعات مبنية على الأدبيات وليست نتائج مثبتة.</p>
+
+<h2>طريقة العمل</h2>
+<p>كل تجربة تمشي على نفس الدورة: <b>فرضية ← توقع ← عرض مرئي ← تفسير ← تحقق مخبري ← تحسين النموذج</b>.
+المنظر المجهري مرسوم من الأرقام المحسوبة لحظة بلحظة، وليس رسوماً جاهزة. ويمكن «تجميد» التوقع قبل التجربة الحقيقية فيُحفظ نهائياً ولا يمكن تعديله، حتى تكون المقارنة مع الواقع نزيهة.</p>
+
+<h2>المختبرات</h2>
+<table>
+<tr><th>المختبر</th><th>السؤال الذي يجيب عنه</th><th>النموذج الرياضي</th><th>الحالة</th></tr>
+<tr><td>الكيموستات (طحالب ودوّارات)</td><td>متى يستقر النظام ومتى يتذبذب أو تنقرض الدوّارات؟ 7 سيناريوهات</td><td>معادلات Fussmann وزملائه (2000): نمو Monod، افتراس Holling II، اتزان وثبات تحليلي، ووضع عشوائي (tau-leaping)</td><td>المعاملات من الأدبيات، تحتاج مراجعة على الورقة</td></tr>
+<tr><td>اللبن (الزبادي)</td><td>كم يحتاج الحليب ليصل pH 4.6 حسب الحرارة ونسبة البادئ؟ 8 سيناريوهات</td><td>نمو حسب الحرارة والحموضة (CTMI/CPM)، إنتاج الحمض (Luedeking–Piret)، تعاون S. thermophilus و L. bulgaricus، وحساب pH الحليب من توازن الشحنات</td><td>استكشافي، يحتاج معايرة</td></tr>
+<tr><td>باني المجتمعات</td><td>ماذا يحدث عند خلط 2 إلى 5 كائنات؟ 9 تجارب جاهزة أو مجتمع من اختيارك</td><td>نموذج عام مبني من صفات كل كائن: موارد، أكسجين، نيتروجين، حموضة، افتراس مع ملجأ للفريسة، تحلل وإعادة تدوير</td><td>استكشافي، الصفات تقديرات من الكتب</td></tr>
+</table>
+<p>التجارب الجاهزة في باني المجتمعات: شبكة غذائية في بركة، مرطبان مخلل، الجبن السويسري، من النبيذ إلى الخل، مخمّر لاهوائي، وعاء مغلق، سباق على وسط غني، بوليمرات فقط، ودورة النيتروجين.</p>
+<p>في كل مختبر زر <b>«قياس التفاعلات»</b> يشغّل كل كائن لوحده وكل زوج معاً، ويصنّف العلاقة (تنافس، افتراس، تعاون، تطفل…) مع شرح السبب من الصفات. وفيه أيضاً <b>تحليل الحساسية</b> لمعرفة أكثر معامل يغيّر النتيجة.</p>
+
+<h2>الكائنات</h2>
+<table>
+<tr><th>المجموعة</th><th>الكائنات</th></tr>
+<tr><td>بكتيريا حمض اللاكتيك</td><td class="en">Streptococcus thermophilus, Lactobacillus delbrueckii subsp. bulgaricus, Lactococcus lactis, Lactiplantibacillus plantarum, Leuconostoc mesenteroides</td></tr>
+<tr><td>بكتيريا أخرى</td><td class="en">Acetobacter aceti, Propionibacterium freudenreichii, Bacillus subtilis, Escherichia coli K-12, Pseudomonas putida, Azotobacter vinelandii, Nitrosomonas europaea</td></tr>
+<tr><td>بكتيريا زرقاء</td><td class="en">Synechococcus elongatus</td></tr>
+<tr><td>عتائق (Archaea)</td><td class="en">Methanosarcina barkeri, Halobacterium salinarum</td></tr>
+<tr><td>خمائر</td><td class="en">Saccharomyces cerevisiae, Kluyveromyces lactis</td></tr>
+<tr><td>فطريات خيطية</td><td class="en">Aspergillus oryzae, Penicillium roqueforti, Rhizopus oligosporus</td></tr>
+<tr><td>طحالب ودياتومات</td><td class="en">Chlorella vulgaris, Scenedesmus obliquus, Navicula sp., Euglena gracilis</td></tr>
+<tr><td>أوليات</td><td class="en">Tetrahymena thermophila, Paramecium caudatum, Vorticella convallaria, Amoeba proteus</td></tr>
+<tr><td>دوّارات (حيوانات مجهرية)</td><td class="en">Brachionus calyciflorus, Philodina roseola</td></tr>
+</table>
+<p class="small">كلها غير ممرضة (مستوى السلامة الحيوية 1). لكل كائن بطاقة بالعربي والإنجليزي: التصنيف، رقم NCBI Taxonomy، الحجم، الشكل، الأيض، التكاثر، الدور، والمراجع.</p>
+
+<h2>وظيفة كل كائن</h2>
+<p><b>17 وظيفة من 20 مستخرجة من نفس الأرقام التي تستخدمها المحاكاة</b>، فلا يمكن أن يختلف الوصف عن السلوك. الثلاث الباقية مضافة يدوياً ومعلَّمة بذلك.</p>
+<table>
+<tr><th>الوظيفة</th><th>عدد الكائنات</th><th>أمثلة</th><th>المصدر</th></tr>
+<tr><td>منتج أولي / منتج للأكسجين</td><td class="num">5</td><td class="en">Chlorella, Scenedesmus, Synechococcus, Navicula, Euglena</td><td><span class="tag">من الصفات</span></td></tr>
+<tr><td>مخمّر لحمض اللاكتيك</td><td class="num">5</td><td>بكتيريا حمض اللاكتيك الخمس</td><td><span class="tag">من الصفات</span></td></tr>
+<tr><td>مُحمِّض</td><td class="num">7</td><td>بكتيريا حمض اللاكتيك، <span class="en">E. coli</span>، <span class="en">Acetobacter</span></td><td><span class="tag">من الصفات</span></td></tr>
+<tr><td>مخمّر للكحول</td><td class="num">2</td><td class="en">S. cerevisiae, Leuconostoc</td><td><span class="tag">من الصفات</span></td></tr>
+<tr><td>محلِّل (منتج إنزيمات)</td><td class="num">5</td><td class="en">Aspergillus, Penicillium, Rhizopus, Bacillus, L. bulgaricus</td><td><span class="tag">من الصفات</span></td></tr>
+<tr><td>متغذٍّ تبادلي</td><td class="num">6</td><td class="en">Propionibacterium, Acetobacter, Penicillium…</td><td><span class="tag">من الصفات</span></td></tr>
+<tr><td>كنّاس هوائي</td><td class="num">1</td><td class="en">Pseudomonas putida</td><td><span class="tag">من الصفات</span></td></tr>
+<tr><td>راعٍ للبكتيريا</td><td class="num">6</td><td>كل الأوليات والدوّارات</td><td><span class="tag">من الصفات</span></td></tr>
+<tr><td>راعٍ للطحالب</td><td class="num">4</td><td class="en">Paramecium, Amoeba, Brachionus, Philodina</td><td><span class="tag">من الصفات</span></td></tr>
+<tr><td>مفترس أعلى</td><td class="num">1</td><td class="en">Amoeba proteus</td><td><span class="tag">من الصفات</span></td></tr>
+<tr><td>مقاوم للرعي</td><td class="num">5</td><td>الفطريات الخيطية، <span class="en">Scenedesmus</span>، <span class="en">Methanosarcina</span></td><td><span class="tag">من الصفات</span></td></tr>
+<tr><td>مثبّت للنيتروجين</td><td class="num">1</td><td class="en">Azotobacter vinelandii</td><td><span class="tag">من الصفات</span></td></tr>
+<tr><td>مؤكسد للأمونيا</td><td class="num">1</td><td class="en">Nitrosomonas europaea</td><td><span class="tag">من الصفات</span></td></tr>
+<tr><td>منتج للميثان</td><td class="num">1</td><td class="en">Methanosarcina barkeri</td><td><span class="tag">من الصفات</span></td></tr>
+<tr><td>مختلط التغذية</td><td class="num">1</td><td class="en">Euglena gracilis</td><td><span class="tag">من الصفات</span></td></tr>
+<tr><td>حساس للأكسجين</td><td class="num">2</td><td class="en">L. bulgaricus, Propionibacterium</td><td><span class="tag">من الصفات</span></td></tr>
+<tr><td>بادئ غذائي</td><td class="num">12</td><td>بكتيريا اللاكتيك، الخمائر، الفطريات…</td><td><span class="tag man">يدوي</span></td></tr>
+<tr><td>كائن نموذجي</td><td class="num">9</td><td class="en">E. coli, B. subtilis, S. cerevisiae…</td><td><span class="tag man">يدوي</span></td></tr>
+<tr><td>محب للظروف القاسية</td><td class="num">2</td><td class="en">Halobacterium, Philodina</td><td><span class="tag man">يدوي</span></td></tr>
+</table>
+<p class="small">«منتج أولي» و«منتج للأكسجين» وظيفتان منفصلتين في البرنامج، ودُمجتا هنا في صف واحد لأن الكائنات نفسها.</p>
+<p>تجد الوظائف في: <b>المكتبة ← حسب الوظيفة</b>، و<b>بطاقة كل كائن</b> (وسوم ملونة وجدول «وظيفته»)، و<b>تبويب «من هو من»</b> داخل كل مختبر، الذي يتوقع من الصفات من يأكل من، ومن يغذي من، ومن يوفّر الأكسجين، وحمض من يضر من.</p>
+
+<h2>قاعدة البيانات والتصدير</h2>
+<ul>
+  <li><b>SQLite</b> في <span class="num">data/microverse.sqlite</span>: جداول الكائنات (35 عموداً) والوظائف والربط بينهما، وتتحدث تلقائياً عند كل تشغيل.</li>
+  <li><b>سجل التوقعات</b> لا يقبل التعديل ولا الحذف (محمي بقيود داخل قاعدة البيانات)، وملفات التجارب محمية ببصمة SHA-256.</li>
+  <li><b>دليل للطباعة PDF</b> بالعربي والإنجليزي في مجلد <span class="num">docs</span>.</li>
+  <li><b>جدول CSV</b> يفتح في Excel والعربي فيه سليم: <span class="num">data/organisms.csv</span>.</li>
+</ul>
+
+<h2>الحالة العلمية</h2>
+<table>
+<tr><th></th><th>التحقق الرياضي (Verification)</th><th>التحقق المخبري (Validation)</th></tr>
+<tr><td>السؤال</td><td>هل الكود يحل المعادلات المكتوبة بشكل صحيح؟</td><td>هل المعادلات تصف الكائنات الحقيقية؟</td></tr>
+<tr><td>الحالة</td><td class="ok">تم: 76 اختباراً آلياً ناجحاً</td><td class="no">لم يتم بعد</td></tr>
+<tr><td>أمثلة</td><td>تطابق الاتزان التحليلي، حفظ كتلة النيتروجين، عتبة الغسل، إمكانية إعادة التشغيل بنفس النتيجة</td><td>يحتاج قياسات pH أو أعداد حقيقية ومقارنتها بتوقع مجمّد</td></tr>
+</table>
+<p>المحاكاة أعطت سلوكاً منطقياً لم يُبرمج مباشرة، مثل: <i>Lactococcus</i> يتوقف عند pH 4.3 ثم يكمل <i>L. plantarum</i> حتى 3.4 في المخلل، و<i>Propionibacterium</i> يعيش على لاكتات غيره، وسلسلة بوليمرات ← لاكتات ← أسيتات ← ميثان، وطحلب يبقي بكتيريا هوائية حية في وعاء مغلق. هذه <b>توقعات قابلة للاختبار</b> وليست نتائج.</p>
+
+<h2>القيود</h2>
+<ul>
+  <li>صفات الكائنات (معدل النمو، درجات الحرارة والحموضة المثلى، النواتج) تقديرات من الكتب وتحتاج مراجعة.</li>
+  <li>معاملات الكيموستات لم تُراجع بعد على ورقة Fussmann (2000).</li>
+  <li>أسماء المعاملات المفردة وعناوين الرسوم البيانية ما زالت بالإنجليزي.</li>
+  <li>مواقع وحركة الكائنات في المجهر توضيحية، أما أعدادها فمن الحسابات.</li>
+  <li>لا توجد بعد شاشة لاستيراد القياسات الحقيقية ومقارنتها تلقائياً.</li>
+</ul>
+
+<h2>الخطوات القادمة المقترحة</h2>
+<ol>
+  <li>مراجعة جدول صفات الكائنات مع د. زهراء (الدليل المطبوع مكتوب لتسهيل ذلك).</li>
+  <li>شاشة «التوقع مقابل الواقع»: استيراد قياسات pH أو أعداد من ملف CSV وحساب الأخطاء.</li>
+  <li>معايرة نموذج اللبن على مجموعة بيانات واختباره على مجموعة أخرى.</li>
+  <li>تشغيل متكرر للوضع العشوائي لحساب احتمال الانقراض مع فترات الثقة.</li>
+</ol>
+<p><b>أسهل مشروع بحثي للبداية:</b> توقع زمن وصول اللبن إلى pH 4.6 عند حرارات ونسب بادئ مختلفة، ثم التحقق بحليب وبادئ تجاري وجهاز pH. باقي الأفكار في <span class="num">docs/RESEARCH_IDEAS.md</span>.</p>
+
+<h2>سجل الإصدارات</h2>
+<table>
+<tr><th>الإصدار</th><th>أهم ما أضيف</th><th>الاختبارات</th></tr>
+<tr><td class="num">0.4</td><td>وظائف الكائنات، قاعدة بيانات SQLite، دليل PDF و CSV، تبويب «من هو من»، مجهر بنافذتين، واجهة أهدأ مع دعم كامل للعربية من اليمين لليسار</td><td class="num">76</td></tr>
+<tr><td class="num">0.3</td><td>30 كائناً، باني المجتمعات، تحليل التفاعلات، واجهة عربية</td><td class="num">54</td></tr>
+<tr><td class="num">0.2</td><td>شاشة البداية، مكتبة الكائنات، مختبر اللبن</td><td class="num">33</td></tr>
+<tr><td class="num">0.1</td><td>الأساس: نموذج الكيموستات، المحرك، سجل التوقعات المحمي، المجهر</td><td class="num">22</td></tr>
+</table>
+<p class="small">الأدوات: Python 3.12، NumPy، SciPy، PySide6، pyqtgraph، SQLite. كلها مجانية وتعمل بدون إنترنت على Windows.</p>
+
+</body>
+</html>
