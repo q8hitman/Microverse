@@ -7,7 +7,7 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
                                QPushButton, QScrollArea, QVBoxLayout, QWidget)
 
-from ..i18n import L, is_ar
+from ..i18n import L, is_ar, tr
 from ..labs import PLANNED, community_lab, fixed_labs
 from ..labs.base import Lab, Scenario
 from ..labs.community import PRESETS
@@ -215,7 +215,7 @@ class StartScreen(QWidget):
             card = ClickCard()
             cl = QVBoxLayout(card)
             lb = QLabel(f"<b>{html.escape(L(sc.title, sc.title_ar))}</b>"
-                        f"<br><span style='color:{TEXT_2}; font-size:9pt'>{html.escape(sc.question)}</span>")
+                        f"<br><span style='color:{TEXT_2}; font-size:9pt'>{html.escape(tr(sc.question))}</span>")
             lb.setWordWrap(True)
             cl.addWidget(lb)
             card.clicked.connect(lambda s=sc, c=card: self.select_scenario(s, c))

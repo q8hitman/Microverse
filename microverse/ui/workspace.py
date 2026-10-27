@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (QButtonGroup, QFrame, QComboBox, QDoubleSpinBox, 
 
 from ..analysis.interactions import analyse
 from ..analysis.sensitivity import elasticities
-from ..i18n import L, group as G, param_name, t as T
+from ..i18n import L, group as G, param_name, t as T, tr
 from ..core.parameters import Evidence
 from ..core.scheduler import run
 from ..core.trajectory import RunConfig
@@ -161,10 +161,10 @@ class Workspace(QWidget):
                 prm = params[sym]
                 sp = QDoubleSpinBox(decimals=3, minimum=prm.lower, maximum=prm.upper, value=prm.value)
                 sp.setSingleStep(max((prm.upper - prm.lower) / 200, 0.001))
-                sp.setSuffix(f"  {prm.unit}" if prm.unit not in ("–", "") else "")
+                sp.setSuffix(f"  {tr(prm.unit)}" if prm.unit not in ("–", "") else "")
                 src = html.escape(prm.source.citation) if prm.source else "—"
                 tip = (f"<b>{html.escape(param_name(prm))}</b><br>{html.escape(prm.description)}<br><br>"
-                       f"<b>Evidence:</b> {EVIDENCE_TEXT[prm.evidence]}<br><b>Source:</b> {src}<br>"
+                       f"<b>Evidence:</b> {tr(EVIDENCE_TEXT[prm.evidence])}<br><b>Source:</b> {src}<br>"
                        f"<b>Checked against source:</b> {'yes' if prm.verified_against_source else 'not yet'}"
                        f"<br><b>Allowed range:</b> {prm.lower:g} – {prm.upper:g} {html.escape(prm.unit)}")
                 sp.setToolTip(tip)
@@ -176,7 +176,7 @@ class Workspace(QWidget):
                 self.spins[sym] = sp
             lay.addWidget(grp)
         legend = QLabel(L("Dot colour = how trustworthy the value is: ", "لون النقطة = مدى موثوقية القيمة: ") + "  ".join(
-            f"<span style='color:{EVIDENCE_COLOURS[e]}'>●</span> {EVIDENCE_TEXT[e]}"
+            f"<span style='color:{EVIDENCE_COLOURS[e]}'>●</span> {tr(EVIDENCE_TEXT[e])}"
             for e in (Evidence.CONTROL, Evidence.LITERATURE_ESTIMATE, Evidence.ASSUMED, Evidence.MEASURED)))
         legend.setWordWrap(True)
         legend.setStyleSheet(f"color:{TEXT_2}; font-size:8pt")
@@ -204,7 +204,7 @@ class Workspace(QWidget):
         if not self.lab.supports_stochastic:
             for wdg in (self.rb_sto, self.seed, self.volume):
                 wdg.setEnabled(False)
-            self.rb_sto.setText("Stochastic (not needed: populations are huge)")
+            self.rb_sto.setText(L("Stochastic (not needed: populations are huge)", "عشوائي (غير ضروري: الأعداد ضخمة)"))
         lay.addWidget(sim)
 
         actions = QGroupBox(L("Experiment", "التجربة"))
@@ -243,9 +243,9 @@ class Workspace(QWidget):
         self.plot_widgets, self.curves, self.cursors = [], [], []
         first = None
         for panel in self.lab.plots:
-            pw = pg.PlotWidget(title=panel.title)
-            pw.setLabel("bottom", "time", self.lab.time_unit)
-            pw.setLabel("left", panel.y_label)
+            pw = pg.PlotWidget(title=tr(panel.title))
+            pw.setLabel("bottom", tr("time"), self.lab.time_unit)
+            pw.setLabel("left", tr(panel.y_label))
             pw.showGrid(x=True, y=True, alpha=0.15)
             pw.setLogMode(y=panel.log_y)
             pw.getAxis("left").enableAutoSIPrefix(False)
@@ -256,10 +256,10 @@ class Workspace(QWidget):
                 pw.setXLink(first)
             for val, label in panel.ref_lines:
                 pw.addItem(pg.InfiniteLine(pos=val, angle=0, pen=pg.mkPen("#8b949e", style=Qt.DotLine),
-                                           label=label, labelOpts={"position": 0.92, "color": "#8b949e"}))
+                                           label=tr(label), labelOpts={"position": 0.92, "color": "#8b949e"}))
             cs = []
             for s in panel.series:
-                cs.append((s, pw.plot([], [], name=s.label,
+                cs.append((s, pw.plot([], [], name=tr(s.label),
                                       pen=pg.mkPen(s.colour, width=2, style=Qt.DashLine if s.dashed else Qt.SolidLine))))
             cur = pg.InfiniteLine(angle=90, movable=True, pen=pg.mkPen("#ffffff", width=1))
             cur.sigDragged.connect(lambda l: self._seek(l.value(), source=l))
@@ -339,7 +339,7 @@ class Workspace(QWidget):
             self.scan_plot.showGrid(x=True, y=True, alpha=0.15)
             self.scan_plot.addLegend(offset=(-8, 8), brush=pg.mkBrush(13, 17, 23, 200), pen=pg.mkPen(BORDER))
             sv.addWidget(self.scan_plot, 1)
-            tabs.addTab(scan, self.lab.scan_title)
+            tabs.addTab(scan, tr(self.lab.scan_title))
 
         if self.lab.supports_stochastic:
             rep = QWidget()
@@ -491,7 +491,7 @@ class Workspace(QWidget):
                        f"<td>{e(s.description)}</td></tr>" for s in m.state_vars)
         prm = "".join(
             f"<tr><td>{e(p.symbol)}</td><td>{e(param_name(p))}</td><td align=right>{p.value:g}</td><td>{e(p.unit)}</td>"
-            f"<td style='color:{EVIDENCE_COLOURS[p.evidence]}'>{EVIDENCE_TEXT[p.evidence]}</td></tr>"
+            f"<td style='color:{EVIDENCE_COLOURS[p.evidence]}'>{tr(EVIDENCE_TEXT[p.evidence])}</td></tr>"
             for p in m.default_parameters().params.values())
         doc = (m.__class__.__module__.split(".")[-1])
         return (f"<h3>{e(m.title)} <span style='color:#8b949e'>(model {e(m.id)} v{e(m.version)})</span></h3>"
@@ -522,7 +522,7 @@ class Workspace(QWidget):
             f"<span style='font-size:12pt; font-weight:700; color:{self.lab.accent}'>"
             f"{html.escape(L(self.lab.title, self.lab.title_ar))}</span>"
             f"  <span style='color:{TEXT_2}'>›</span>  <b>{html.escape(L(sc.title, sc.title_ar))}</b>"
-            f"<br><span style='color:{TEXT_2}'>{T('question')}: {html.escape(sc.question)}</span>")
+            f"<br><span style='color:{TEXT_2}'>{T('question')}: {html.escape(tr(sc.question))}</span>")
         self.cur_t = 0.0
         self._params_changed()
 

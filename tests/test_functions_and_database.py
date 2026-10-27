@@ -120,3 +120,13 @@ def test_every_parameter_has_an_arabic_name():
     for lab in list(fixed_labs()) + [community_lab(("chlorella", "ecoli"), "custom")]:
         for p in lab.model.default_parameters().params.values():
             assert p.symbol in PARAM_AR, (lab.key, p.symbol)
+
+
+def test_every_scenario_question_and_plot_label_has_arabic():
+    from microverse.i18n import TERMS_AR
+    from microverse.labs import all_labs
+    for lab in all_labs():
+        for s in lab.scenarios:
+            assert s.question in TERMS_AR, s.question
+        for pnl in lab.plots:
+            assert pnl.title in TERMS_AR, pnl.title

@@ -106,3 +106,75 @@ PARAM_AR = {
 def param_name(prm) -> str:
     """Parameter name in the current language (falls back to English)."""
     return PARAM_AR.get(prm.symbol, prm.name) if is_ar() else prm.name
+
+
+# Display strings defined in lab definitions (plot titles, axis labels, series names, scan titles).
+TERMS_AR = {
+    "B — all rotifers": "B — كل الدوّارات", "C — Chlorella": "C — كلوريلا", "N — dissolved nitrogen": "N — النيتروجين الذائب",
+    "R — egg-bearing rotifers": "R — الدوّارات الحاملة للبيض", "Populations and nutrient": "الأعداد والمغذيات",
+    "Bacteria": "البكتيريا", "CFU/mL (log scale)": "CFU/مل (مقياس لوغاريتمي)", "Food and products": "الغذاء والنواتج",
+    "Organisms": "الكائنات", "Sugar and acid": "السكر والحمض", "pH and oxygen": "الحموضة والأكسجين",
+    "pH of the milk": "حموضة الحليب", "Regime scan (δ)": "مسح الأنظمة (δ)", "Temperature scan": "مسح درجة الحرارة",
+    "acetate": "أسيتات", "biomass (mg/L)": "الكتلة الحيوية (ملغم/ل)", "end point": "نقطة النهاية", "ethanol": "إيثانول",
+    "galactose": "جالاكتوز", "gel onset": "بداية التخثر", "lactate": "لاكتات", "lactic acid": "حمض اللاكتيك",
+    "lactose": "لاكتوز", "nitrogen": "نيتروجين", "oxygen (mg/L)": "أكسجين (ملغم/ل)", "polymers": "بوليمرات",
+    "pH": "الحموضة (pH)", "sugars": "سكريات", "pH  /  O₂ (mg/L)": "الحموضة / أكسجين (ملغم/ل)", "time": "الزمن",
+    "measured": "مقاس", "literature estimate": "تقدير من المراجع", "fitted": "معاير", "derived": "مشتق",
+    "assumed (exploratory)": "مفترض (استكشافي)", "you control it": "تتحكم فيه أنت", "× full daylight": "× ضوء النهار الكامل",
+}
+
+
+def tr(text: str) -> str:
+    """Translate a display string from a lab definition when the interface is Arabic (else unchanged)."""
+    if not is_ar():
+        return text
+    if text in TERMS_AR:
+        return TERMS_AR[text]
+    from .library.organisms import ORGANISMS
+    for o in ORGANISMS.values():                     # organism names in series labels
+        if text == o.name:
+            return o.name_ar
+    return text
+
+TERMS_AR.update({
+    # scenario questions
+    "At an intermediate dilution rate, do algae and rotifers oscillate instead of settling?":
+        "عند معدل تخفيف متوسط، هل تتذبذب الطحالب والدوّارات بدلاً من أن تستقر؟",
+    "With very slow medium exchange, do the oscillations die out?": "مع تبديل بطيء جداً للوسط، هل يخمد التذبذب؟",
+    "Near the rotifers' limit, do both species settle at a steady level?": "قرب حد الدوّارات، هل يستقر النوعان عند مستوى ثابت؟",
+    "If the vessel is diluted faster than rotifers can reproduce, what happens to each species?":
+        "إذا خُفّف الوعاء أسرع مما تتكاثر الدوّارات، ماذا يحدث لكل نوع؟",
+    "Above which dilution rate can even the algae not persist?": "فوق أي معدل تخفيف لا تستطيع حتى الطحالب البقاء؟",
+    "Does adding more nutrient (Nᵢ = 160) destabilise a system that was stable?":
+        "هل تؤدي زيادة المغذيات (Nᵢ = 160) إلى زعزعة نظام كان مستقراً؟",
+    "In a 5 mL vessel, can random births and deaths wipe out the rotifers during a cycle trough?":
+        "في وعاء 5 مل، هل تستطيع الولادات والوفيات العشوائية إفناء الدوّارات عند قاع الدورة؟",
+    "With a 1:1 starter at 43 °C, how long until the milk sets at pH 4.6?":
+        "مع بادئ بنسبة 1:1 عند 43 °م، كم يحتاج الحليب ليتخثر عند pH 4.6؟",
+    "Without its partner, how much slower is acidification, and where does it stop?":
+        "بدون شريكه، كم يكون التحميض أبطأ، وأين يتوقف؟",
+    "Can the rod acidify milk on its own in a normal fermentation time?": "هل تستطيع العصية تحميض الحليب وحدها في زمن تخمير عادي؟",
+    "What does a lower temperature do to timing and to the balance between the species?":
+        "ماذا تفعل الحرارة الأقل بالتوقيت وبالتوازن بين النوعين؟",
+    "Near the cardinal maximum, which organism fails first?": "قرب الحد الأعلى للحرارة، أي كائن يفشل أولاً؟",
+    "If the yoghurt is left warm for 16 h, how sour does it become and who keeps acidifying?":
+        "إذا تُرك اللبن دافئاً 16 ساعة، كم يصبح حامضاً ومن يستمر في التحميض؟",
+    "With stronger milk buffering (×1.4), how much longer to pH 4.6?": "مع تنظيم أقوى في الحليب (×1.4)، كم يزيد الزمن حتى pH 4.6؟",
+    "Does changing the starter ratio change speed and final composition?": "هل يغيّر تغيير نسبة البادئ السرعة والتركيب النهائي؟",
+    "Can three levels of a food web coexist, and do their numbers rise and fall in turn?":
+        "هل تتعايش ثلاثة مستويات من شبكة غذائية، وهل ترتفع أعدادها وتنخفض بالتناوب؟",
+    "Which lactic acid bacterium finishes the fermentation, and at what pH does each one stop?":
+        "أي بكتيريا لاكتيك تُكمل التخمير، وعند أي pH يتوقف كل منها؟",
+    "Can one organism live on the waste product of another?": "هل يستطيع كائن أن يعيش على فضلات كائن آخر؟",
+    "Does adding the vinegar bacterium at the same time help or hurt?": "هل تفيد إضافة بكتيريا الخل في نفس الوقت أم تضر؟",
+    "Polymers → lactate → acetate → methane: does each organism depend on the one before it?":
+        "بوليمرات ← لاكتات ← أسيتات ← ميثان: هل يعتمد كل كائن على الذي قبله؟",
+    "In a closed vessel, can an alga keep an aerobic bacterium alive? What happens in the dark?":
+        "في وعاء مغلق، هل يستطيع طحلب إبقاء بكتيريا هوائية حية؟ وماذا يحدث في الظلام؟",
+    "Three fast growers, one pot of sugar: who wins, and does the acid decide it?":
+        "ثلاثة كائنات سريعة النمو ووعاء سكر واحد: من يفوز، وهل يحسم الحمض النتيجة؟",
+    "With no free sugar, can a bacterium survive next to a mould that makes enzymes?":
+        "بدون سكر حر، هل تعيش بكتيريا بجانب فطر ينتج إنزيمات؟",
+    "Who competes for nitrogen, and who brings new nitrogen in?": "من يتنافس على النيتروجين، ومن يُدخل نيتروجيناً جديداً؟",
+    "Which organisms survive together, and how do they change each other?": "أي الكائنات تعيش معاً، وكيف يغيّر بعضها بعضاً؟",
+})
