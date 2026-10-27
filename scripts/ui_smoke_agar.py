@@ -17,7 +17,7 @@ pg.setConfigOptions(antialias=True, background="#0d1117", foreground="#c9d1d9")
 from microverse.ui.main_window import MainWindow
 
 w = MainWindow(); w.resize(1600, 980); w.show()
-shot = lambda n: w.grab().save(str(ROOT / "screenshots" / n))
+shot = lambda n: print("saved", n, w.grab().save(str(ROOT / "screenshots" / n)))
 steps = []
 t = [0]
 
@@ -53,6 +53,7 @@ at(600, lambda: shot("v05_agar_dendritic.png"))
 at(300, lambda: setup("aoryzae", 1.0, 1.0, "spot", 6, 200))
 at(12000, lambda: finish("v05_agar_mould.png"))
 at(600, lambda: shot("v05_agar_mould.png"))
+at(300, lambda: print("mould shot exists:", (ROOT / "screenshots" / "v05_agar_mould.png").exists()))
 at(300, app.quit)
 for ms, fn in steps:
     QTimer.singleShot(ms, fn)
