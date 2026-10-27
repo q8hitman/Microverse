@@ -341,6 +341,36 @@ class Workspace(QWidget):
             sv.addWidget(self.scan_plot, 1)
             tabs.addTab(scan, self.lab.scan_title)
 
+        if self.lab.supports_stochastic:
+            rep = QWidget()
+            rl = QVBoxLayout(rep)
+            info = QLabel(L("Chance matters in small vessels. This runs the SAME settings many times in stochastic mode, "
+                            "each with a different random seed, and reports how often each population went extinct "
+                            "(with a 95% confidence interval) and the 5–95% envelope of the populations.",
+                            "الصدفة مهمة في الأوعية الصغيرة. هذا يشغّل نفس الإعدادات عدة مرات بالوضع العشوائي، كل مرة ببذرة "
+                            "مختلفة، ويبيّن كم مرة انقرض كل نوع (مع مجال ثقة 95٪) ومدى 5–95٪ للأعداد."))
+            info.setWordWrap(True)
+            rl.addWidget(info)
+            h = QHBoxLayout()
+            h.addWidget(QLabel(L("Replicates:", "عدد التكرارات:")))
+            self.rep_n = QSpinBox(minimum=5, maximum=500, value=30)
+            h.addWidget(self.rep_n)
+            self.btn_rep = QPushButton("▶ " + L("Run replicates", "شغّل التكرارات"))
+            self.btn_rep.clicked.connect(self._run_replicates)
+            h.addWidget(self.btn_rep)
+            self.rep_prog = QProgressBar()
+            h.addWidget(self.rep_prog, 1)
+            rl.addLayout(h)
+            self.rep_plot = pg.PlotWidget()
+            self.rep_plot.showGrid(x=True, y=True, alpha=0.15)
+            self.rep_plot.addLegend(offset=(-8, 8), brush=pg.mkBrush(13, 17, 23, 200), pen=pg.mkPen(BORDER))
+            self.rep_plot.setLabel("bottom", "time", self.lab.time_unit)
+            rl.addWidget(self.rep_plot, 1)
+            self.rep_text = QLabel()
+            self.rep_text.setWordWrap(True)
+            rl.addWidget(self.rep_text)
+            tabs.addTab(rep, L("Replicates", "التكرارات"))
+
         orgs = QWidget()
         ov = QVBoxLayout(orgs)
         for k in self.lab.organisms:
@@ -593,7 +623,10 @@ class Workspace(QWidget):
         self._explain_dirty = False
         sb = self.explain_view.verticalScrollBar().value()
         extra = (self.sens, self.inter) if self.lab.key == "community" else self.sens
-        self.explain_view.setHtml(self.lab.explain_html(self.traj, self.traj.index_at(self.cur_t), extra))
+        from ..analysis.changes import to_html as changes_html
+        idx = self.traj.index_at(self.cur_t)
+        self.explain_view.setHtml(self.lab.explain_html(self.traj, idx, extra) +
+                                  changes_html(self.model, self.traj, idx, self.sens))
         self.explain_view.verticalScrollBar().setValue(sb)
 
     # ------------------------------------------------------ analysis actions
@@ -628,7 +661,36 @@ class Workspace(QWidget):
         self._show_outcome()
         self._refresh_explanation(force=True)
 
-    def _run_scan(self):
+    def _run_replicates(self):
+        from ..analysis.replicates import run_replicates
+        self.btn_rep.setEnabled(False)
+        cfg = replace(self.current_config(), mode="stochastic")
+        job = Job(None, run_replicates, self.model, cfg, self.rep_n.value(), with_progress=True)
+        job.signals.progress.connect(lambda i, n: (self.rep_prog.setMaximum(n), self.rep_prog.setValue(i)))
+        job.signals.done.connect(self._replicates_done)
+        job.signals.failed.connect(lambda t, tb: (self.btn_rep.setEnabled(True), self._failed(t, tb)))
+        self.pool.start(job)
+
+    def _replicates_done(self, _token, s):
+        from ..analysis.replicates import describe
+        from ..i18n import is_ar
+        self.btn_rep.setEnabled(True)
+        self.rep_plot.clear()
+        names = {sv.symbol: sv.name for sv in self.model.state_vars}
+        colours = {}
+        for panel in self.lab.plots:
+            for ser in panel.series:
+                colours[ser.label.split(" — ")[0].split(" ")[0]] = ser.colour
+        for j, sym in enumerate(s.symbols):
+            col = colours.get(sym, "#9da7b3")
+            lo = pg.PlotDataItem(s.t, s.lo[:, j], pen=pg.mkPen(col, width=0.5))
+            hi = pg.PlotDataItem(s.t, s.hi[:, j], pen=pg.mkPen(col, width=0.5))
+            c = pg.mkColor(col)
+            c.setAlpha(50)
+            self.rep_plot.addItem(pg.FillBetweenItem(lo, hi, brush=c))
+            self.rep_plot.plot(s.t, s.mean[:, j], pen=pg.mkPen(col, width=2), name=f"{names.get(sym, sym)} (mean)")
+        self.rep_text.setText("<br>".join(describe(s, names, self.lab.time_unit, is_ar())))
+
         self.btn_scan.setEnabled(False)
         job = Job(None, self.lab.scan_compute, self.lab, self.current_config(), with_progress=True)
         job.signals.progress.connect(lambda i, n: (self.scan_prog.setMaximum(n), self.scan_prog.setValue(i)))

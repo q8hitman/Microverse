@@ -120,3 +120,16 @@ def test_organisms_used_by_the_fixed_labs_are_mapped_to_model_variables():
     for key in ("chlorella", "brachionus", "sthermophilus", "lbulgaricus"):
         o = ORGANISMS[key]
         assert o.model_variables and o.references
+
+
+def test_peptide_pool_never_needs_clipping():
+    """v1.1 fix: integrated WITHOUT the scheduler's clipping, peptides stay ≥ 0 in every scenario."""
+    from scipy.integrate import solve_ivp
+    from microverse.labs import get as get_lab
+    lab = get_lab("yogurt")
+    for s in lab.scenarios:
+        cfg = lab.config(s.overrides, t_end=s.t_end)
+        p = dict(cfg.parameters)
+        sol = solve_ivp(lambda t, y: lab.model.rhs(t, y, p), (0, cfg.t_end), np.array(cfg.initial_state),
+                        method="LSODA", rtol=1e-8, atol=1e-10)
+        assert sol.y[5].min() > -1e-6, s.key

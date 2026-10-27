@@ -48,6 +48,7 @@ BUFFERS = ((6.8, 71.3), (5.1, 22.4), (4.4, 66.7))         # (pKa, total mM): pho
 PH0 = 6.65
 
 XS, XL, LAC, GAL, ACID, PEP, FORM = range(7)
+PEP_UPTAKE_K = 0.5            # mg/L; keeps peptide uptake ≤ availability
 
 
 def ctmi(T, tmin, topt, tmax):
@@ -83,7 +84,7 @@ def milk_ph(lactic_g_l: float, buffer_scale: float = 1.0) -> float:
 
 class Yogurt(Model):
     id = "yogurt"
-    version = "1.0.0"
+    version = "1.1.0"          # 1.1: peptide uptake limited by availability (pool could go negative)
     title = "Yoghurt fermentation: S. thermophilus + L. bulgaricus in milk"
     time_unit = "h"
     state_vars = (
@@ -181,22 +182,25 @@ class Yogurt(Model):
         acid_S = p["alpha"] * gS + p["betaS"] * f["acid_S"] * y[XS]
         acid_L = p["alpha"] * gL + p["betaL"] * f["acid_L"] * y[XL]
         prot = p["kP"] * f["fT_L"] * y[XL]
-        return f, gS, gL, acid_S, acid_L, prot
+        # uptake cannot exceed what is there: saturating in P with a small constant (0.5 mg/L). Without it the
+        # pool was driven below zero (down to −9 mg/L when S. thermophilus grows alone) and silently clipped.
+        uptake = p["yP"] * gS * y[PEP] / (y[PEP] + PEP_UPTAKE_K)
+        return f, gS, gL, acid_S, acid_L, prot, uptake
 
     def rhs(self, t, y, p):
-        f, gS, gL, aS, aL, prot = self._terms(y, p)
+        f, gS, gL, aS, aL, prot, uptake = self._terms(y, p)
         acid = aS + aL
         return np.array([
             gS, gL,
             -LACTOSE_PER_LACTATE * acid,
             GAL_PER_LACTATE * acid,
             acid,
-            prot - p["yP"] * gS,
+            prot - uptake,
             p["yF"] * gS,
         ])
 
     def flux_terms(self, y, p):
-        f, gS, gL, aS, aL, prot = self._terms(y, p)
+        f, gS, gL, aS, aL, prot, uptake = self._terms(y, p)
         return [
             FluxTerm("XS", "growth of S. thermophilus", gS, "μ_S·X_S"),
             FluxTerm("XL", "growth of L. bulgaricus", gL, "μ_L·X_L"),
@@ -207,7 +211,7 @@ class Yogurt(Model):
             FluxTerm("A", "acid from S. thermophilus", aS, "α·μ_S·X_S + β_S·X_S"),
             FluxTerm("A", "acid from L. bulgaricus", aL, "α·μ_L·X_L + β_L·X_L"),
             FluxTerm("P", "released by L. bulgaricus proteolysis", prot, "k_P·f_T,L·X_L"),
-            FluxTerm("P", "taken up by S. thermophilus", -p["yP"] * gS, "−y_P·μ_S·X_S"),
+            FluxTerm("P", "taken up by S. thermophilus", -uptake, "−y_P·μ_S·X_S·P/(P+0.5)"),
             FluxTerm("F", "produced by S. thermophilus", p["yF"] * gS, "y_F·μ_S·X_S"),
         ]
 
