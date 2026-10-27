@@ -22,7 +22,10 @@ On another PC: `python -m venv .venv` then `.venv/Scripts/pip install -r require
 5. **Freeze prediction** — stores the prediction permanently *before* you do the real experiment.
 6. **Prediction vs Reality** (start screen) — import your measurements (CSV), compare them with a frozen
    prediction, get error metrics, a plain-language reading of the differences and a saved report.
-7. **Virtual Agar** (start screen) — plate a culture, watch colonies grow, count them (qualitative model).
+   **Calibrate → new prediction** fits a few parameters to that data set and freezes the fit as a NEW
+   prediction, to be tested on a different data set (docs/CALIBRATION.md).
+7. **Virtual Agar** (start screen) — plate a culture, watch colonies grow, count them; two organisms on one plate,
+   lactic acid spreading from lactic acid bacteria, a pH-indicator view (qualitative model).
 8. **Microscope view** — Realistic / Microscope (phase contrast, Gram stain) / Explanation overlays;
    wheel to zoom, drag to pan, click an organism to inspect it; Replay; swimming speed.
 9. **Language** — switch English / العربية at the top of the start screen.

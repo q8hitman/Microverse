@@ -20,7 +20,7 @@
 ## What would count as validation (planned)
 1. Check every default parameter against Fussmann et al. (2000) and its supplement (owner / ChatGPT review).
 2. Qualitative: compare the regime-versus-δ pattern with the published experimental chemostats.
-3. Quantitative: import chemostat time series (algae cells/mL, rotifers/mL), compare with a **frozen** prediction, compute errors (RMSE on log densities, period and amplitude error), recalibrate on one dataset, evaluate on a different one.
+3. Quantitative: import chemostat time series (algae cells/mL, rotifers/mL), compare with a **frozen** prediction, compute errors (RMSE on log densities, period and amplitude error), recalibrate on one dataset (tool available since v0.5.1), evaluate on a different one.
 
 Until then, outputs are **mechanistic predictions** from literature-based parameters.
 
@@ -38,3 +38,15 @@ Until then, outputs are **mechanistic predictions** from literature-based parame
   (`tests/test_ui_construct.py`), and a regression test for the yoghurt peptide fix.
 
 The comparison page is the tool for validation, but no laboratory data set has been compared yet.
+
+## Added in v0.5.1
+- **Calibration** (`tests/test_calibration.py`, `docs/CALIBRATION.md`): recovers known parameters from synthetic
+  data within its intervals; flags values at their limits; refuses under-determined fits; stores the fit as a
+  NEW prediction with provenance and leaves the original untouched; flags a comparison with the fitting file as
+  "a fit, not a test". Calibration on data set A followed by comparison with a different data set B is the
+  validation step; it has not yet been done with real data.
+- **Agar** (`tests/test_agar.py`): the dish wall is no-flux; the finer spot grid gives the same colony within 20 %;
+  only lactic acid bacteria make acid, bounded by the food they ferment; two organisms are planted and counted
+  separately; a deferred organism appears only after its delay; lactic acid holds back an acid-sensitive
+  neighbour in the halo (compared with the same plate without acid) and buffering protects it; an acid-tolerant
+  yeast is held back less.

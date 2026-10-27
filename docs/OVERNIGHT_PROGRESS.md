@@ -75,7 +75,7 @@ Modified: the three scenes and three lab widgets, `workspace.py`, `main_window.p
 * `v05_yog_microscope.png`: yoghurt Gram stain.
 * `v05_gallery_natural.png`, `v05_gallery_microscope.png`: all 30 organisms, resting and mid-division.
 * `v05_reality.png`: Prediction vs Reality with synthetic data (a delay of 0.48 h was detected as "model early by 0.48 h").
-* `v05_agar_count.png`, `v05_agar_dendritic.png`, `v05_agar_mould.png`: plate count, branched B. subtilis,
+* `v05_agar_count.png`, `v05_agar_dendritic.png`, `v05_agar_mould.png`: plate count, B. subtilis on poor agar (the file name says "dendritic", but the colony was a compact disc; corrected in v0.5.1),
   mould mat.
 
 **Limitation:** the screenshots were inspected by the developer (an AI) frame by frame, not watched live by a
@@ -98,18 +98,17 @@ thread. The target GPU is not used (QPainter is CPU), and does not need to be at
   the paper's PDF.
 * See `docs/SCIENTIFIC_REVIEW.md` §C for the suspected issues list.
 
-## 10. Remaining work (exact continuation plan)
+## 10. Remaining work (updated after v0.5.1)
 1. Look at the app live on the target PC (Windows, RTX 4060 Ti): play each lab at default and 4× speed in all
    three modes and note anything that still looks like popping. If needed, tune `division_s` per species in
    `library/morphology.py` and `_pressure_duration` in `viz/population.py`.
-2. Import the first real yoghurt data set (pH every 15–30 min and selective counts) in Prediction vs Reality.
-3. Calibration screen: fit on data set A and create a NEW frozen prediction, then test it on data set B
-   (never touch the old one).
-4. Agar: two species on one plate; a diffusing benign inhibitor (e.g. acid from a lactic acid bacterium);
-   finer grid in spot mode.
-5. Microscope: spatial structure only if a spatial model drives it; per-species tuning after the live review.
-6. Arabic: review the translations with a native-speaking microbiologist (terminology).
-7. Open a pull request from `dev/v0.5` to `main` after review (GitHub CLI is not installed here).
+2. Import the first real yoghurt data set (pH every 15–30 min and selective counts) in Prediction vs Reality,
+   calibrate on it (new prediction), and test that prediction on a second, different data set.
+3. Agar: colonies are 3–5× too large for the assumed clock, and thin branches are not reproduced (grid too coarse);
+   see docs/models/agar.md for what each would need.
+4. Microscope: spatial structure only if a spatial model drives it; per-species tuning after the live review.
+5. Arabic: review the translations with a native-speaking microbiologist (terminology).
+6. Open a pull request from `dev/v0.5` to `main` after review (GitHub CLI is not installed here).
 
 ## 11. Final commit
 The commit that adds this report is the last commit on `dev/v0.5`; run `git log -1 dev/v0.5` to see its hash.
@@ -124,3 +123,23 @@ Or double-click `MicroVerse.bat` while the `dev/v0.5` branch is checked out. Tes
 `.venv\Scripts\python -m pytest -q`. Screenshot scripts are in `scripts/`. New screens are on the start screen:
 **📏 Prediction vs Reality** and **🧫 Virtual Agar**. In any lab, use the **View** and **Swimming** menus under
 the player, wheel to zoom, and click an organism to inspect it.
+
+## 13. Continuation (v0.5.1, same day)
+Done from the plan above (items 3 and 4 of the earlier list):
+
+* **Calibration → new prediction** (`analysis/calibration.py`, `ui/calibration_dialog.py`, docs/CALIBRATION.md).
+  Tested on synthetic data: known parameters are recovered within their intervals; the original prediction stays
+  byte-for-byte unchanged; a comparison with the fitting file is flagged "a fit, not a test".
+  Screenshots: `v051_calibration.png`, `v051_calibration_same_data.png`.
+* **Agar: two organisms, lactic acid, pH indicator, finer spot grid, deferred test.** Screenshots:
+  `v051_agar_lactic_overlay.png` (Lactococcus first, E. coli spread 24 h later: the plate turns yellow and E. coli
+  grows only where acid has not reached), `v051_agar_lactic_overlay_buffered.png` (same plate, buffered agar:
+  E. coli everywhere), `v051_agar_two_spots.png` (B. subtilis flattened on the side facing the acid halo),
+  `v051_agar_mixed_count.png` (E. coli and yeast counted separately), `v051_agar_lobed_fine.png`.
+* **Agar numerics corrected:** the dish wall absorbed nutrient (now no-flux); nutrient diffusion was 7.6× too slow
+  for the assumed clock (now derived from glucose's diffusion coefficient; lactate 1.4× faster); colonies were
+  visible at t = 0 (founders now start invisible); unstable steps on rich soft agar (now sub-stepped).
+* **Correction of a v0.5 claim:** `v05_agar_dendritic.png` was described as "branched B. subtilis"; it showed a
+  compact disc. Branched colonies are still not reproduced (lobed edges at most). The readout's "box-counting
+  dimension" was replaced by a fill fraction, because it called two separate round colonies "branched".
+* Tests: **207 passed** (was 190).

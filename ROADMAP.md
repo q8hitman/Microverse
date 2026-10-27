@@ -12,7 +12,7 @@ Status keys: ✅ implemented & tested · 🟡 partial · ⏳ planned · 🔬 val
 - ✅ M1 demo: chemostat microcosm
 - ✅ Start screen, scenario picker, bilingual organism library, lab framework (v0.2)
 - ✅ Organism trait database (30 BSL-1 organisms), Community Builder, interaction analysis, Arabic UI (v0.3)
-- ✅ Prediction vs Reality: freeze ✅, import CSV ✅, compare and metrics ✅, report ✅ (v0.5); calibration ⏳
+- ✅ Prediction vs Reality: freeze ✅, import CSV ✅, compare and metrics ✅, report ✅ (v0.5); calibration → new prediction ✅ (v0.5.1)
 - ⏳ School / Research mode switch (same engine, different panels)
 - ✅ Replicate runner for stochastic mode (extinction probability with Wilson CI) (v0.5)
 - ✅ Continuous microscope: persistent identities, organism-specific division and motility, 3 view modes (v0.5)
@@ -20,7 +20,7 @@ Status keys: ✅ implemented & tested · 🟡 partial · ⏳ planned · 🔬 val
 ## Phase 2 — First laboratories
 - ⏳ Ecosystem creator (multi-species chemostat / pond food web builder)
 - 🟡 Food microbiology: yoghurt fermentation ✅ (exploratory, needs calibration); laban/cheese/probiotic survival ⏳
-- 🟡 Virtual agar: colony growth ✅, morphology vs food/agar ✅, plate counts ✅ (v0.5, qualitative); two species, inhibition zones, calibration ⏳
+- 🟡 Virtual agar: colony growth ✅, morphology vs food/agar ✅, plate counts ✅ (v0.5, qualitative); two species, lactic acid inhibition, pH indicator, finer spot grid ✅ (v0.5.1); branched (dendritic) colonies 🟡 (lobed only, see docs/models/agar.md); calibration ⏳
 
 ## Phase 3 — Expanded biological systems
 - ⏳ Skin / oral microbiome (community models, not clinical) · Biofilm (attachment, gradients, cross-sections) · Food webs
@@ -34,14 +34,14 @@ Status keys: ✅ implemented & tested · 🟡 partial · ⏳ planned · 🔬 val
 ## Phase 6 — Advanced UX
 - ⏳ 3D rendering (pygfx or Godot), local AI assistant (optional), classroom tools, PDF reports, experiment builder
 
-## Immediate next steps (proposed, after v0.5)
+## Immediate next steps (proposed, after v0.5.1)
 0. Review the organism trait table AND the morphology table (`library/morphology.py`) with the supervisor.
 1. Confirm the chemostat parameters against the Fussmann et al. (2000) PDF and supplement.
-2. First real data set: yoghurt pH and counts → Prediction vs Reality; then calibration that creates a NEW
-   prediction (fit on one data set, test on another).
-3. Agar: two species on one plate (competition), and a diffusing inhibitor (educational, benign).
-4. Microscope: let ciliates visibly ingest bacteria across panels (inset), and draw spatial structure only when a
-   spatial model drives it.
-5. Remaining English strings in the Arabic UI (plot titles, scan tab, some legends).
+2. First real data set: yoghurt pH and counts → Prediction vs Reality → Calibrate on that data set → test the
+   new prediction on a second, different data set (the tools for every step exist since v0.5.1).
+3. Agar: real branched colonies need a finer grid or a different growth rule (see docs/models/agar.md);
+   colony sizes are 3–5× too large for the assumed clock, so plates crowd at lower counts than real plates.
+4. Microscope: spatial structure only when a spatial model drives it; per-species tuning after the live review.
+5. Arabic terminology review by a native-speaking microbiologist.
 6. Spatial grid for the cell-separation step if drawing caps are raised.
 See docs/RESEARCH_IDEAS.md for research directions and docs/OVERNIGHT_PROGRESS.md for status.

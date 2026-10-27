@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.5.1 — 2026-10-27 — Calibration; two organisms and lactic acid on agar
+- **Calibration → new prediction** (Prediction vs Reality, step 5; `analysis/calibration.py`): fit up to five
+  parameters to the imported data set (bounded weighted least squares, log scale for rates), with linearised
+  95 % intervals and warnings for values at their limits, poorly determined values and correlated pairs. The fit
+  is frozen as a NEW prediction that records the source prediction, the file SHA-256 and the fitted values
+  (also stored as `fitted` parameters under a new model version). The original prediction is never changed.
+  Comparing a calibrated prediction with its own fitting file is flagged as "a fit, not a test" on screen and in
+  the report. See docs/CALIBRATION.md.
+- **Virtual Agar: two organisms** on one plate (shared food, crowding), spread as a mixture or as two spots, with
+  an optional delay for the second (deferred test). Colonies are drawn in each organism's colour and texture and
+  counted per organism (circles and squares).
+- **Lactic acid** from lactic acid bacteria diffuses through the agar (≈1.4× faster than sugar, as lactate vs
+  glucose in water) and stops growth above each organism's acid limit (tolerant: lactic bacteria, yeast, mould;
+  sensitive: E. coli, B. subtilis, P. putida). Agar buffering protects sensitive neighbours. Optional
+  bromocresol-purple view (purple → yellow where acid spread). Fermenters use more food per biomass (yield).
+- **Agar numerics:** the dish wall is now no-flux for every field (before, it absorbed nutrient); spot mode uses a
+  1.5× finer grid with the same physics; stable sub-steps where cells pile up; small molecules diffuse in their
+  own sub-steps; freshly plated cells start below the visibility threshold (colonies were visible at t = 0).
+- **Corrections:** v0.5 called its B. subtilis screenshot "branched"; it was a compact disc. Branched colonies
+  are not reproduced at this resolution (lobed edges at most; see docs/models/agar.md). Colonies are 3–5×
+  larger than real colonies of the same age; the page now says so.
+- Tests: 207 (was 190): calibration 8, agar +8, calibration dialog construction 1.
+
 ## 0.5.0 — 2026-10-27 — Continuous microscope, Prediction vs Reality, Virtual Agar
 - **Fixed: organisms popped in and out.** Root cause: every scene used an immigration–death process. Drawn
   cells vanished with probability dt/0.6 s and new ones were dropped at random positions every frame, even

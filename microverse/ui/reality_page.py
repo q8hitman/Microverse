@@ -322,7 +322,7 @@ class RealityPage(QWidget):
             r2 = "–" if m.r2 is None else f"{m.r2:.3f}"
             parts.append(f"<tr><td>{html.escape(L(o.label, o.label_ar))}{' (log10)' if o.log else ''}</td><td>{m.n}</td>"
                          f"<td>{m.rmse:.3g}</td><td>{m.bias:+.3g}</td><td>{m.nrmse * 100:.0f}%</td><td>{r2}</td>"
-                         f"<td>{m.shift:+.3g} {unit_t}</td></tr>")
+                         f"<td>{m.shift + 0.0:+.3g} {unit_t}</td></tr>")
         parts.append("</table>")
         for o, s, m, _p in self.results:
             parts.append("<ul>" + "".join(f"<li>{html.escape(x)}</li>" for x in R.explain(m, o, unit_t, ar)) + "</ul>")
