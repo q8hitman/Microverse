@@ -112,3 +112,11 @@ def test_guide_contains_every_organism_and_function():
         assert o.name in html
     for f in FUNCTIONS.values():
         assert f.name in html
+
+
+def test_every_parameter_has_an_arabic_name():
+    from microverse.i18n import PARAM_AR
+    from microverse.labs import community_lab, fixed_labs
+    for lab in list(fixed_labs()) + [community_lab(("chlorella", "ecoli"), "custom")]:
+        for p in lab.model.default_parameters().params.values():
+            assert p.symbol in PARAM_AR, (lab.key, p.symbol)

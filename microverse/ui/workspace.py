@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (QButtonGroup, QFrame, QComboBox, QDoubleSpinBox, 
 
 from ..analysis.interactions import analyse
 from ..analysis.sensitivity import elasticities
-from ..i18n import L, group as G, t as T
+from ..i18n import L, group as G, param_name, t as T
 from ..core.parameters import Evidence
 from ..core.scheduler import run
 from ..core.trajectory import RunConfig
@@ -163,13 +163,13 @@ class Workspace(QWidget):
                 sp.setSingleStep(max((prm.upper - prm.lower) / 200, 0.001))
                 sp.setSuffix(f"  {prm.unit}" if prm.unit not in ("–", "") else "")
                 src = html.escape(prm.source.citation) if prm.source else "—"
-                tip = (f"<b>{html.escape(prm.name)}</b><br>{html.escape(prm.description)}<br><br>"
+                tip = (f"<b>{html.escape(param_name(prm))}</b><br>{html.escape(prm.description)}<br><br>"
                        f"<b>Evidence:</b> {EVIDENCE_TEXT[prm.evidence]}<br><b>Source:</b> {src}<br>"
                        f"<b>Checked against source:</b> {'yes' if prm.verified_against_source else 'not yet'}"
                        f"<br><b>Allowed range:</b> {prm.lower:g} – {prm.upper:g} {html.escape(prm.unit)}")
                 sp.setToolTip(tip)
                 sp.valueChanged.connect(self._params_changed)
-                name = QLabel(f"<span style='color:{EVIDENCE_COLOURS[prm.evidence]}'>●</span> {html.escape(prm.name)}")
+                name = QLabel(f"<span style='color:{EVIDENCE_COLOURS[prm.evidence]}'>●</span> {html.escape(param_name(prm))}")
                 name.setToolTip(tip)
                 name.setWordWrap(True)
                 form.addRow(name, sp)
@@ -482,7 +482,7 @@ class Workspace(QWidget):
         rows = "".join(f"<tr><td><b>{e(s.symbol)}</b></td><td>{e(s.name)}</td><td>{e(s.unit)}</td>"
                        f"<td>{e(s.description)}</td></tr>" for s in m.state_vars)
         prm = "".join(
-            f"<tr><td>{e(p.symbol)}</td><td>{e(p.name)}</td><td align=right>{p.value:g}</td><td>{e(p.unit)}</td>"
+            f"<tr><td>{e(p.symbol)}</td><td>{e(param_name(p))}</td><td align=right>{p.value:g}</td><td>{e(p.unit)}</td>"
             f"<td style='color:{EVIDENCE_COLOURS[p.evidence]}'>{EVIDENCE_TEXT[p.evidence]}</td></tr>"
             for p in m.default_parameters().params.values())
         doc = (m.__class__.__module__.split(".")[-1])
@@ -691,6 +691,7 @@ class Workspace(QWidget):
             self.rep_plot.plot(s.t, s.mean[:, j], pen=pg.mkPen(col, width=2), name=f"{names.get(sym, sym)} (mean)")
         self.rep_text.setText("<br>".join(describe(s, names, self.lab.time_unit, is_ar())))
 
+    def _run_scan(self):
         self.btn_scan.setEnabled(False)
         job = Job(None, self.lab.scan_compute, self.lab, self.current_config(), with_progress=True)
         job.signals.progress.connect(lambda i, n: (self.scan_prog.setMaximum(n), self.scan_prog.setValue(i)))

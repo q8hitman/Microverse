@@ -78,3 +78,31 @@ def group(name: str) -> str:
 
 def num(x: float, digits: int = 2) -> str:
     return f"{x:.{digits}f}"
+
+
+# Arabic names of individual model parameters (symbol → name). Symbols that are shared by several
+# models mean the same thing in each.
+PARAM_AR = {
+    "delta": "معدل التخفيف δ", "Ni": "النيتروجين الداخل Nᵢ", "bC": "أقصى معدل امتصاص للطحالب b_C",
+    "KC": "ثابت نصف التشبع للطحالب K_C", "bB": "أقصى معدل تجنيد للدوّارات b_B", "KB": "ثابت نصف التشبع للدوّارات K_B",
+    "eps": "كفاءة التمثيل ε", "m": "معدل موت الدوّارات m", "lam": "معدل تراجع الخصوبة λ",
+    "T": "درجة الحرارة", "XS0": "لقاح S. thermophilus", "XL0": "لقاح L. bulgaricus", "Lac0": "اللاكتوز الابتدائي",
+    "buf": "قوة التنظيم (البفر) في الحليب", "muS": "μ المثلى لـ S. thermophilus", "TminS": "أدنى حرارة لـ S. thermophilus",
+    "ToptS": "الحرارة المثلى لـ S. thermophilus", "TmaxS": "أعلى حرارة لـ S. thermophilus",
+    "pHminS": "أدنى pH لـ S. thermophilus", "aS": "نمو S. thermophilus بدون ببتيدات",
+    "muL": "μ المثلى لـ L. bulgaricus", "TminL": "أدنى حرارة لـ L. bulgaricus", "ToptL": "الحرارة المثلى لـ L. bulgaricus",
+    "TmaxL": "أعلى حرارة لـ L. bulgaricus", "pHminL": "أدنى pH لـ L. bulgaricus", "aL": "نمو L. bulgaricus بدون فورمات",
+    "kP": "إطلاق الببتيدات بواسطة L. bulgaricus", "KP": "ثابت نصف التشبع للببتيدات", "P0": "الأحماض الأمينية/الببتيدات في الحليب",
+    "yP": "استهلاك الببتيدات بواسطة S. thermophilus", "yF": "إنتاج الفورمات بواسطة S. thermophilus",
+    "KF": "ثابت نصف التشبع للفورمات", "F0": "الفورمات من المعاملة الحرارية للحليب", "alpha": "الحمض لكل كتلة جديدة (α)",
+    "betaS": "حمض الصيانة لـ S. thermophilus (β)", "betaL": "حمض الصيانة لـ L. bulgaricus (β)",
+    "light": "الضوء", "aeration": "التهوية (تبادل الغازات)", "poly0": "البوليمرات المضافة", "sug0": "السكريات المضافة",
+    "nh40": "النيتروجين المضاف", "inoculum": "لقاح كل كائن", "buffer": "قوة تنظيم الوسط", "ph_base": "الـ pH الابتدائي",
+    "dilution": "التخفيف (التدفق المستمر)", "refuge": "ملجأ الفريسة", "det_rate": "تحلل البقايا العضوية",
+    "mu_scale": "مضاعف معدل النمو",
+}
+
+
+def param_name(prm) -> str:
+    """Parameter name in the current language (falls back to English)."""
+    return PARAM_AR.get(prm.symbol, prm.name) if is_ar() else prm.name
