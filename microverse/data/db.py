@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import sqlite3
 from dataclasses import asdict
 from datetime import datetime, timezone
@@ -12,14 +13,16 @@ from ..core.model import Model
 from ..core.trajectory import RunConfig
 
 SCHEMA = Path(__file__).with_name("schema.sql")
-DEFAULT_DB = Path(__file__).resolve().parents[2] / "data" / "microverse.sqlite"
+# MICROVERSE_DB lets tests and screenshots use a scratch database (predictions are permanent once written).
+DEFAULT_DB = Path(os.environ.get("MICROVERSE_DB") or Path(__file__).resolve().parents[2] / "data" / "microverse.sqlite")
 
 
 def now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
-def connect(path: Path | str = DEFAULT_DB) -> sqlite3.Connection:
+def connect(path: Path | str | None = None) -> sqlite3.Connection:
+    path = DEFAULT_DB if path is None else path
     path = Path(path) if str(path) != ":memory:" else path
     if isinstance(path, Path):
         path.parent.mkdir(parents=True, exist_ok=True)

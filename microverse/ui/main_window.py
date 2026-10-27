@@ -6,6 +6,7 @@ from PySide6.QtWidgets import QMainWindow, QMessageBox, QStackedWidget
 
 from .. import i18n
 from ..i18n import L
+from .reality_page import RealityPage
 from .start_screen import LibraryPage, StartScreen
 from .workspace import Workspace
 
@@ -68,7 +69,7 @@ class MainWindow(QMainWindow):
         self._menu()
 
     def _build(self):
-        for old in (self.start, self.library):
+        for old in (self.start, self.library, getattr(self, "reality", None)):
             if old is not None:
                 self.stack.removeWidget(old)
                 old.deleteLater()
@@ -76,6 +77,8 @@ class MainWindow(QMainWindow):
         self.start.start.connect(self.open_lab)
         self.start.open_library.connect(lambda: self.stack.setCurrentWidget(self.library))
         self.start.lang_changed.connect(self.change_language)
+        self.start.open_reality.connect(self.open_reality)
+        self.reality = None
         self.library = LibraryPage()
         self.library.back.connect(self.home)
         self.stack.addWidget(self.start)
@@ -112,6 +115,15 @@ class MainWindow(QMainWindow):
         self.stack.addWidget(self.workspace)
         self.stack.setCurrentWidget(self.workspace)
         self.setWindowTitle(f"MicroVerse — {L(lab.title, lab.title_ar)} › {L(scenario.title, scenario.title_ar)}")
+
+    def open_reality(self):
+        if self.reality is None:
+            self.reality = RealityPage()
+            self.reality.back.connect(self.home)
+            self.stack.addWidget(self.reality)
+        else:
+            self.reality.refresh()
+        self.stack.setCurrentWidget(self.reality)
 
     def home(self):
         self.stack.setCurrentWidget(self.start)

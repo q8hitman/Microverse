@@ -83,6 +83,21 @@ CREATE TABLE IF NOT EXISTS observations (
     source_file TEXT
 );
 
+-- Prediction-vs-reality comparisons (v0.5). Append-only like predictions: a comparison is a record of
+-- what was compared, with which file (SHA-256) and what came out.
+CREATE TABLE IF NOT EXISTS comparisons (
+    id INTEGER PRIMARY KEY,
+    prediction_id INTEGER NOT NULL REFERENCES predictions(id),
+    created TEXT NOT NULL,
+    observations_sha256 TEXT NOT NULL,
+    metrics_json TEXT NOT NULL,
+    report_path TEXT
+);
+CREATE TRIGGER IF NOT EXISTS comparisons_no_update BEFORE UPDATE ON comparisons
+BEGIN SELECT RAISE(ABORT, 'comparisons are immutable'); END;
+CREATE TRIGGER IF NOT EXISTS comparisons_no_delete BEFORE DELETE ON comparisons
+BEGIN SELECT RAISE(ABORT, 'comparisons are immutable'); END;
+
 -- ---- Organism reference database (schema version 2) -------------------------------
 -- One row per organism with the full record (description + simulation traits) as JSON,
 -- plus the most-used fields as columns so the table can be queried and opened in any SQLite browser.

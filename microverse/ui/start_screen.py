@@ -55,6 +55,7 @@ def _clear(lay):
 class StartScreen(QWidget):
     start = Signal(object, object)          # (Lab, Scenario)
     open_library = Signal()
+    open_reality = Signal()
     lang_changed = Signal(str)
 
     def __init__(self, parent=None):
@@ -83,6 +84,9 @@ class StartScreen(QWidget):
         self.lib_btn = QPushButton()
         self.lib_btn.clicked.connect(self.open_library)
         head.addWidget(self.lib_btn, 0, Qt.AlignTop)
+        self.real_btn = QPushButton()
+        self.real_btn.clicked.connect(self.open_reality)
+        head.addWidget(self.real_btn, 0, Qt.AlignTop)
         root.addLayout(head)
 
         body = QHBoxLayout()
@@ -111,6 +115,9 @@ class StartScreen(QWidget):
                            "مختبر محاكاة وتوقّع ميكروبيولوجي<br>"
                            "<span style='color:#6e7681'>فرضية ← توقع ← تصوّر ← تفسير ← تحقق مخبري</span>"))
         self.lib_btn.setText(L("📚 Organism library", "📚 مكتبة الكائنات"))
+        self.real_btn.setText(L("📏 Prediction vs Reality", "📏 التوقع مقابل الواقع"))
+        self.real_btn.setToolTip(L("Compare a frozen prediction with your laboratory measurements (CSV).",
+                                   "قارن توقعاً مجمّداً بقياساتك المخبرية (CSV)."))
         lay = self.left_lay
         _clear(lay)
         h = QLabel(L("1 · Choose a lab", "1 · اختر المختبر"))
