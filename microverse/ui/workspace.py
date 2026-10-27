@@ -8,7 +8,7 @@ from pathlib import Path
 
 import numpy as np
 import pyqtgraph as pg
-from PySide6.QtCore import QThreadPool, QTimer, Qt, Signal
+from PySide6.QtCore import QElapsedTimer, QThreadPool, QTimer, Qt, Signal
 from PySide6.QtWidgets import (QButtonGroup, QFrame, QComboBox, QDoubleSpinBox, QFileDialog, QFormLayout, QGroupBox,
                                QHBoxLayout, QInputDialog, QLabel, QMessageBox, QProgressBar, QPushButton,
                                QRadioButton, QScrollArea, QSlider, QSpinBox, QSplitter, QTabWidget, QTextBrowser,
@@ -279,12 +279,46 @@ class Workspace(QWidget):
         self.slider.sliderMoved.connect(lambda v_: self._seek(v_ / 1000 * self._t_max()))
         unit = self.lab.time_unit
         self.speed = QDoubleSpinBox(decimals=2, minimum=0.01, maximum=100,
-                                    value=4.0 if unit == "d" else 0.5, suffix=f"  {unit}/s")
-        self.speed.setToolTip("Simulated time per real second during playback")
+                                    value=2.0 if unit == "d" else 0.5, suffix=f"  {unit}/s")
+        self.speed.setToolTip(L("Simulated time per real second during playback (time-lapse of growth and death)",
+                                "الزمن المحاكى في كل ثانية حقيقية أثناء التشغيل (تسريع النمو والموت)"))
+        self.btn_replay = QPushButton("↺ " + L("Replay", "إعادة"))
+        self.btn_replay.setToolTip(L("Start again from time 0 with a fresh sample", "ابدأ من الزمن صفر بعينة جديدة"))
+        self.btn_replay.clicked.connect(self._replay)
         self.time_lbl = QLabel()
-        for wdg in (self.btn_play, self.slider, QLabel(T("speed")), self.speed, self.time_lbl):
+        for wdg in (self.btn_play, self.btn_replay, self.slider, QLabel(T("speed")), self.speed, self.time_lbl):
             bar.addWidget(wdg, 1 if wdg is self.slider else 0)
         v.addLayout(bar)
+        view = QHBoxLayout()
+        from ..viz.specimen import MODE_LABELS, MODES
+        view.addWidget(QLabel(L("View:", "العرض:")))
+        self.mode_combo = QComboBox()
+        for m in MODES:
+            self.mode_combo.addItem(L(*MODE_LABELS[m]), m)
+        self.mode_combo.setToolTip(L("Realistic: brightfield colours · Microscope: phase contrast (or Gram stain for "
+                                     "smears) · Explanation: marks dividing, dying and eaten cells and who eats whom. "
+                                     "All three show the same simulated state.",
+                                     "واقعي: ألوان المجهر الضوئي · مجهري: تباين الطور (أو صبغة جرام) · الشرح: يعلّم "
+                                     "الخلايا التي تنقسم أو تموت أو تُؤكل. الثلاثة تعرض نفس الحالة المحسوبة."))
+        self.mode_combo.currentIndexChanged.connect(lambda _: self._set_mode())
+        view.addWidget(self.mode_combo)
+        view.addSpacing(16)
+        view.addWidget(QLabel(L("Swimming:", "السباحة:")))
+        self.motion_combo = QComboBox()
+        for label, val in ((L("real speed", "السرعة الحقيقية"), 1.0), (L("½ speed", "نصف السرعة"), 0.5),
+                           (L("¼ speed", "ربع السرعة"), 0.25), (L("still", "متوقفة"), 0.0)):
+            self.motion_combo.addItem(label, val)
+        self.motion_combo.setToolTip(L("How fast organisms swim on screen. Growth and division follow the playback "
+                                       "speed instead.", "سرعة سباحة الكائنات على الشاشة. النمو والانقسام يتبعان "
+                                       "سرعة التشغيل."))
+        self.motion_combo.currentIndexChanged.connect(lambda _: setattr(self.scene, "motion_scale",
+                                                                        self.motion_combo.currentData()))
+        view.addWidget(self.motion_combo)
+        view.addStretch(1)
+        hint = QLabel(L("wheel = zoom · drag = pan · click = inspect", "العجلة = تكبير · السحب = تحريك · النقر = فحص"))
+        hint.setObjectName("muted")
+        view.addWidget(hint)
+        v.addLayout(view)
         tabs.addTab(live, L("Live lab", "المختبر الحي"))
 
         if self.lab.scan_compute:
@@ -529,15 +563,28 @@ class Workspace(QWidget):
     def _tick(self):
         if self.traj is None:
             return
-        dt = 0.033
+        if not hasattr(self, "_clock"):
+            self._clock = QElapsedTimer()
+            self._clock.start()
+        dt = min(self._clock.restart() / 1000.0, 0.1)        # real seconds since the last frame
         if self.playing:
             self._seek(self.cur_t + self.speed.value() * dt)
             if self.cur_t >= self._t_max():
                 self._toggle_play()
-        idx = self.traj.index_at(self.cur_t)
-        self.scene.sync(self.traj, idx, dt)
-        self.micro.expected = self.scene.expected_counts(self.traj.y[idx])
+        self.scene.update(self.traj, self.cur_t, dt)          # interpolated state at the current time
         self.micro.time_d = self.cur_t
+        self.micro.update()
+
+    def _replay(self):
+        if self.traj is None:
+            return
+        self.scene.replay(self.traj, 0.0)
+        self._seek(0.0)
+        if not self.playing:
+            self._toggle_play()
+
+    def _set_mode(self):
+        self.scene.mode = self.mode_combo.currentData()
         self.micro.update()
 
     def _refresh_explanation(self, force=False):

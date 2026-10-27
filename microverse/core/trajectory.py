@@ -55,6 +55,18 @@ class Trajectory:
     def index_at(self, time: float) -> int:
         return int(np.clip(np.searchsorted(self.t, time), 0, len(self.t) - 1))
 
+    def state_at(self, time: float) -> np.ndarray:
+        """State linearly interpolated between output points, so playback is smooth between rows.
+        (Rendering only: analysis keeps using the solver's own output rows.)"""
+        t = self.t
+        if time <= t[0]:
+            return self.y[0].copy()
+        if time >= t[-1]:
+            return self.y[-1].copy()
+        j = int(np.searchsorted(t, time))
+        w = (time - t[j - 1]) / (t[j] - t[j - 1])
+        return self.y[j - 1] * (1 - w) + self.y[j] * w
+
     def to_csv(self) -> str:
         header = "time_d," + ",".join(self.state_symbols)
         rows = [header, f"# config_hash={self.config_hash}", f"# mode={self.config.mode} (SIMULATED DATA)"]

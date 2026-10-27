@@ -194,9 +194,9 @@ def test_renderer_reads_state_but_never_changes_it():
     for i in range(0, len(tr.t), 10):
         scene.sync(tr, i, dt_real=0.05)
     assert np.array_equal(tr.y, before)
-    # rendered counts follow the state (Poisson around expected value)
+    # drawn counts follow the state (persistent agents settle on the expected value; see test_visualization)
     i = len(tr.t) - 1
     for _ in range(200):
         scene.sync(tr, i, dt_real=0.05)
     exp_alg, _ = scene.expected_counts(tr.y[i])
-    assert abs(len(scene.algae) - exp_alg) <= 5 * np.sqrt(exp_alg) + 2
+    assert abs(scene.tracks[0].pop.cells() - exp_alg) <= max(1.5, 0.1 * exp_alg)

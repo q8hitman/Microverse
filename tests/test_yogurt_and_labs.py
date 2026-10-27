@@ -111,8 +111,8 @@ def test_yogurt_scene_reads_state_only():
         sc.sync(tr, i, 0.05)
     assert np.array_equal(tr.y, before)
     e_st, e_lb = sc.expected_counts(tr.y[i])
-    assert abs(sc.st_cells() - e_st) <= 5 * np.sqrt(e_st) + 2
-    assert abs(len(sc.lb_rods) - e_lb) <= 5 * np.sqrt(e_lb) + 2
+    assert abs(sc.st_cells() - e_st) <= max(1.5, 0.1 * e_st)
+    assert abs(sc.tracks[1].pop.cells() - e_lb) <= max(1.5, 0.1 * e_lb)
 
 
 def test_organisms_used_by_the_fixed_labs_are_mapped_to_model_variables():

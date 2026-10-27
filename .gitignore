@@ -4,3 +4,4 @@
 __pycache__/
 data/*.sqlite
 screenshots/
+docs/MicroVerse_source_*.zip

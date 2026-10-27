@@ -1,98 +1,80 @@
-"""Paints the MicroscopeScene. Drawing only — all numbers come from the scene/state."""
+"""Chemostat microscope: rotifers (4×) and Chlorella (40×), plus the chemostat vessel."""
 from __future__ import annotations
 
 import math
 
 from PySide6.QtCore import QPointF, QRectF, Qt
-from PySide6.QtGui import (QBrush, QColor, QFont, QLinearGradient, QPainter, QPainterPath, QPen,
-                           QRadialGradient)
-from PySide6.QtWidgets import QSizePolicy, QWidget
+from PySide6.QtGui import QBrush, QColor, QFont, QLinearGradient, QPainterPath, QPen
 
-from ..viz.scene import ALGAE_FIELD, ROTIFER_FIELD, MicroscopeScene
+from ..i18n import L
+from ..viz.scene import MicroscopeScene
+from .specimen_view import SpecimenView
 
 
-class MicroscopeWidget(QWidget):
+class MicroscopeWidget(SpecimenView):
+    side_width = 0.14
+
     def __init__(self, scene: MicroscopeScene, parent=None):
-        super().__init__(parent)
-        self.scene = scene
-        self.expected = (0.0, 0.0)
-        self.time_d = 0.0
-        self.setMinimumHeight(260)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        super().__init__(scene, parent)
+        self.time_unit = "d"
 
-    def paintEvent(self, _):
-        p = QPainter(self)
-        p.setRenderHint(QPainter.Antialiasing)
-        p.fillRect(self.rect(), QColor("#101418"))
-        w, h = self.width(), self.height()
-        gap = 10
-        lw = (w - 3 * gap) * 0.58
-        rect_r = QRectF(gap, gap + 18, lw, h - 2 * gap - 36)
-        rect_a = QRectF(2 * gap + lw, gap + 18, w - 3 * gap - lw, h - 2 * gap - 36)
-        self._rotifer_field(p, self._fit(rect_r, ROTIFER_FIELD))
-        self._algae_field(p, self._fit(rect_a, ALGAE_FIELD))
-        p.setPen(QColor("#8a96a3"))
-        p.setFont(QFont("Segoe UI", 8))
-        p.drawText(QRectF(gap, h - 20, w - 2 * gap, 18), Qt.AlignLeft | Qt.AlignVCenter,
-                   f"t = {self.time_d:.1f} d  ·  Rendered FROM the simulation state: counts are Poisson samples of "
-                   "density × sampled volume; positions, orientation and swimming are visual only.")
-        p.end()
+    def panel_title(self, name):
+        if name == "rotifers":
+            return L("Brachionus — 4× objective, sieved sample", "براكيونس – عدسة 4×، عينة مُصفّاة")
+        return L("Chlorella — 40× objective, counting chamber", "كلوريلا – عدسة 40×، شريحة عدّ")
 
-    @staticmethod
-    def _fit(r: QRectF, f) -> QRectF:
-        aspect = f.width_um / f.height_um
-        if r.width() / r.height() > aspect:
-            ww = r.height() * aspect
-            return QRectF(r.x() + (r.width() - ww) / 2, r.y(), ww, r.height())
-        hh = r.width() / aspect
-        return QRectF(r.x(), r.y() + (r.height() - hh) / 2, r.width(), hh)
+    def panel_background(self, name):
+        inner, outer = super().panel_background(name)
+        if name == "rotifers" and self.scene.mode != "microscope":       # culture colour follows algal density
+            t = self.scene.tint
+            inner = QColor.fromRgbF(0.94 - 0.30 * t, 0.95 - 0.10 * t, 0.88 - 0.36 * t)
+            outer = QColor.fromRgbF(0.62 - 0.22 * t, 0.64 - 0.10 * t, 0.56 - 0.25 * t)
+        return inner, outer
 
-    def _frame(self, p, rect, field, bg_inner, bg_outer, title, count, expected):
-        g = QRadialGradient(rect.center(), max(rect.width(), rect.height()) * 0.65)
-        g.setColorAt(0, bg_inner)
-        g.setColorAt(1, bg_outer)
+    def agent_extra(self, track_index, agent):
+        return {"eggs": self.scene.eggs_of(agent)} if track_index == 1 else {}
+
+    def paint_side(self, p, area):
+        s = self.scene
+        p.setPen(QColor("#c9d1d9"))
+        p.setFont(QFont("Segoe UI", 8, QFont.DemiBold))
+        p.drawText(QRectF(area.x(), area.y() - 16, area.width(), 14), Qt.AlignLeft | Qt.AlignVCenter,
+                   L("The chemostat", "الكيموستات"))
+        jw = min(area.width() * 0.7, area.height() * 0.4)
+        jar = QRectF(area.x() + (area.width() - jw) / 2, area.y() + 24, jw, jw * 1.2)
+        p.setPen(QPen(QColor(200, 210, 220, 150), 2))
+        p.setBrush(QColor(255, 255, 255, 16))
+        p.drawRoundedRect(jar, 8, 8)
+        fill = jar.adjusted(4, jar.height() * 0.15, -4, -4)
+        t = s.tint
+        g = QLinearGradient(fill.topLeft(), fill.bottomLeft())
+        g.setColorAt(0, QColor.fromRgbF(0.80 - 0.45 * t, 0.86 - 0.2 * t, 0.78 - 0.5 * t, 0.95))
+        g.setColorAt(1, QColor.fromRgbF(0.66 - 0.4 * t, 0.74 - 0.2 * t, 0.62 - 0.45 * t, 0.95))
         p.setPen(Qt.NoPen)
         p.setBrush(QBrush(g))
-        p.drawRoundedRect(rect, 6, 6)
-        p.setPen(QColor("#c9d3dd"))
-        p.setFont(QFont("Segoe UI", 8, QFont.DemiBold))
-        p.drawText(QRectF(rect.x(), rect.y() - 18, rect.width(), 16), Qt.AlignLeft | Qt.AlignVCenter, title)
-        p.setFont(QFont("Segoe UI", 8))
-        label = QRectF(rect.right() - 170, rect.y() + 6, 164, 18)
-        p.setPen(Qt.NoPen)
-        p.setBrush(QColor(0, 0, 0, 120))
-        p.drawRoundedRect(label, 4, 4)
-        p.setPen(QColor("#f0f3f6"))
-        p.drawText(label, Qt.AlignCenter, f"drawn {count} · expected {expected:.1f}")
-
-    def _scale_bar(self, p, rect, field, um, label):
-        px = um / field.width_um * rect.width()
-        x0, y0 = rect.right() - px - 12, rect.bottom() - 12
-        p.setPen(QPen(QColor(20, 20, 20, 220), 3))
-        p.drawLine(QPointF(x0, y0), QPointF(x0 + px, y0))
-        p.setFont(QFont("Segoe UI", 8))
-        p.drawText(QRectF(x0 - 20, y0 - 18, px + 40, 14), Qt.AlignCenter, label)
-
-    # ---- rotifers ---------------------------------------------------------
-    def _rotifer_field(self, p, rect):
-        s = self.scene
-        t = s.tint
-        inner = QColor.fromRgbF(0.93 - 0.35 * t, 0.94 - 0.12 * t, 0.86 - 0.40 * t)
-        outer = QColor.fromRgbF(0.55 - 0.25 * t, 0.57 - 0.12 * t, 0.50 - 0.28 * t)
-        self._frame(p, rect, ROTIFER_FIELD, inner, outer, ROTIFER_FIELD.title, len(s.rotifers), self.expected[1])
-        p.save()
-        clip = QPainterPath()
-        clip.addRoundedRect(rect, 6, 6)
-        p.setClipPath(clip)
-        k = rect.width() / ROTIFER_FIELD.width_um
-        for x, y, heading, eggs, length, phase in s.rotifers:
-            self._rotifer(p, QPointF(rect.x() + x * k, rect.y() + y * k), heading, int(eggs), length * k, phase)
-        p.restore()
-        p.setPen(QColor(30, 50, 30))
+        p.drawRect(fill)
+        p.setPen(QPen(QColor("#58a6ff"), 2))                         # inflow and outflow (dilution)
+        p.drawLine(QPointF(jar.left() - 14, jar.top() + 6), QPointF(jar.left() + 6, jar.top() + 6))
+        p.drawLine(QPointF(jar.right() - 6, fill.top() + 6), QPointF(jar.right() + 14, fill.top() + 6))
+        y = jar.bottom() + 12
+        p.setFont(QFont("Segoe UI", 9))
+        y_state = s.y if s.y is not None else [0, 0, 0, 0]
+        for label, value in [
+            (L("N µmol/L", "النيتروجين"), f"{y_state[0]:.1f}"),
+            (L("Chlorella", "كلوريلا"), f"{y_state[1]:.1f}"),
+            (L("rotifers", "الدوّارات"), f"{y_state[3]:.2f}"),
+            (L("with eggs", "تحمل بيضاً"), f"{s.egg_fraction * 100:.0f}%"),
+        ]:
+            p.setPen(QColor("#8b949e"))
+            p.drawText(QRectF(area.x(), y, area.width(), 16), Qt.AlignLeft | Qt.AlignVCenter, label)
+            p.setPen(QColor("#e6edf3"))
+            p.drawText(QRectF(area.x(), y, area.width(), 16), Qt.AlignRight | Qt.AlignVCenter, value)
+            y += 18
+        p.setPen(QColor("#6e7681"))
         p.setFont(QFont("Segoe UI", 7))
-        p.drawText(rect.adjusted(8, 4, -8, -4), Qt.AlignLeft | Qt.AlignBottom,
-                   f"background tint ∝ algal density C (culture colour)")
-        self._scale_bar(p, rect, ROTIFER_FIELD, 1000, "1 mm")
+        p.drawText(QRectF(area.x(), y + 4, area.width(), 40), Qt.TextWordWrap,
+                   L("biomass in µmol N/L; culture colour ∝ algal density",
+                     "الكتلة بالميكرومول نيتروجين/لتر؛ لون المزرعة يتبع كثافة الطحالب"))
 
     @staticmethod
     def _rotifer(p, c, heading, eggs, L, phase):
@@ -151,44 +133,3 @@ class MicroscopeWidget(QWidget):
             p.drawEllipse(QPointF((e - (eggs - 1) / 2) * w * 0.38, L * 0.42), w * 0.17, L * 0.10)
         p.restore()
 
-    # ---- algae ------------------------------------------------------------
-    def _algae_field(self, p, rect):
-        s = self.scene
-        self._frame(p, rect, ALGAE_FIELD, QColor(246, 244, 236), QColor(178, 176, 166),
-                    ALGAE_FIELD.title.split(" — ")[0] + " — 40×", len(s.algae), self.expected[0])
-        p.save()
-        clip = QPainterPath()
-        clip.addRoundedRect(rect, 6, 6)
-        p.setClipPath(clip)
-        k = rect.width() / ALGAE_FIELD.width_um
-        n_auto = int(len(s.algae) * s.autospore_fraction)
-        for i, (x, y, d, ph) in enumerate(s.algae):
-            self._alga(p, QPointF(rect.x() + x * k, rect.y() + y * k), d * k / 2, ph, i < n_auto)
-        p.restore()
-        self._scale_bar(p, rect, ALGAE_FIELD, 50, "50 µm")
-
-    def _alga(self, p, c, r, phase, autospores):
-        r = max(r, 1.5)
-        g = QRadialGradient(c + QPointF(-r * 0.3, -r * 0.3), r * 1.2)
-        g.setColorAt(0, QColor(150, 205, 120))
-        g.setColorAt(0.7, QColor(60, 140, 55))
-        g.setColorAt(1, QColor(30, 85, 35))
-        p.setPen(QPen(QColor(25, 60, 25, 200), 0.8))
-        p.setBrush(QBrush(g))
-        p.drawEllipse(c, r, r)
-        if r < 3:
-            return
-        if autospores:
-            p.setBrush(QColor(40, 110, 40, 180))
-            p.setPen(Qt.NoPen)
-            for j in range(4):
-                a = phase * 6.28 + j * math.pi / 2
-                p.drawEllipse(c + QPointF(math.cos(a) * r * 0.42, math.sin(a) * r * 0.42), r * 0.38, r * 0.38)
-            return
-        # cup-shaped chloroplast + pyrenoid
-        p.setPen(QPen(QColor(25, 90, 30, 200), max(1.0, r * 0.35)))
-        start = int((phase * 360) * 16)
-        p.drawArc(QRectF(c.x() - r * 0.7, c.y() - r * 0.7, r * 1.4, r * 1.4), start, 220 * 16)
-        p.setPen(Qt.NoPen)
-        p.setBrush(QColor(210, 230, 190, 200))
-        p.drawEllipse(c + QPointF(r * 0.15, r * 0.1), r * 0.18, r * 0.18)

@@ -24,21 +24,29 @@ class Portrait(QWidget):
         self.setFixedSize(self.size_px, self.size_px)
 
     def paintEvent(self, _):
-        from .community_widget import CommunityWidget
+        from ..library.morphology import spec_for
+        from ..viz.population import Agent
+        from .specimen_paint import Look, paint_agent
         p = QPainter(self)
         p.setRenderHint(QPainter.Antialiasing)
         p.setPen(Qt.NoPen)
-        p.setBrush(QColor("#0d1117"))
         s = self.size_px
+        p.setBrush(QColor("#e9e6dc"))                     # brightfield disc
         p.drawEllipse(QRectF(2, 2, s - 4, s - 4))
-        c = QPointF(s / 2, s / 2)
-        col = QColor(self.org.colour)
-        draw = self.org.draw
-        size = s * (0.52 if draw in ("rod", "chain", "hypha", "colony") else 0.46)
-        if draw in ("coccus", "chain"):
-            size = s * 0.26
-            c = QPointF(s * 0.28, s * 0.42)
-        CommunityWidget._draw_cell(p, self.org, c, 0.5, size, 0.4, col)
+        spec = spec_for(self.org.key)
+        n = min(max(spec.max_chain, 1), 4)
+        units = n if spec.shape in ("coccus", "ovococcus", "rod", "oval") else 1
+        span = spec.length_um * (units if spec.shape != "packet" else 1.2)
+        if spec.shape in ("bell", "hypha"):
+            span *= 1.9
+        k = s * 0.66 / max(span, 1e-6)
+        a = Agent(0, 0.0, 0.0, -0.45 if spec.shape not in ("bell",) else 0.0, n=n, variant=0.7, phase=1.0)
+        p.translate(s / 2, s / 2)
+        if spec.shape == "hypha":
+            p.translate(-s * 0.3, s * 0.15)
+        elif spec.shape == "bell":
+            p.translate(0, s * 0.3)
+        paint_agent(p, spec, a, k, Look("natural"))
         p.end()
 
 
