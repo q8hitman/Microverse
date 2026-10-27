@@ -84,3 +84,30 @@ def test_calibration_dialog_fits_and_shows_results(app):
     dlg._done(dlg.token, res)
     assert dlg.btn_freeze.isEnabled() and "muS" in dlg.report.toHtml()
     dlg.grab()
+
+
+def test_changing_inputs_after_compare_blocks_a_stale_save(app, tmp_path, monkeypatch):
+    """Results may only be saved together with the inputs they were computed from."""
+    from microverse.core.scheduler import run
+    from microverse.data import db
+    from microverse.labs import get
+    from microverse.ui import reality_page
+    from microverse.ui.reality_page import RealityPage
+    monkeypatch.setattr(reality_page, "EXAMPLE", tmp_path)       # keep the synthetic CSV out of data/
+    lab = get("yogurt")
+    con = db.connect()
+    for _ in range(2):
+        cfg = lab.config({}, t_end=10.0)
+        db.freeze_prediction(con, cfg, {"lab": "yogurt", "scenario": "classic", "outcome": "x"}, "ui",
+                             db.save_experiment(con, "ui", cfg))
+    page = RealityPage()
+    page.refresh()
+    page._example()
+    page._compare()
+    assert page.results and page.btn_save.isEnabled() and page._snap[0] is page.fp
+    page.offset.setValue(page.offset.value() + 1)                # edit the mapping
+    assert not page.results and not page.btn_save.isEnabled()
+    page._compare()
+    assert page.btn_save.isEnabled()
+    page.pred_combo.setCurrentIndex((page.pred_combo.currentIndex() + 1) % page.pred_combo.count())
+    assert not page.results and not page.btn_save.isEnabled()   # another prediction selected

@@ -76,6 +76,17 @@ def test_log10_counts_are_converted():
     assert not errors and np.allclose(series[0].values, [1e6, 1e7])
 
 
+def test_infinite_and_overflowing_values_are_skipped_not_crashing():
+    lab, obs = yog_obs()
+    table = R.read_table("t,c,logc\n0,inf,6\n1,1e6,400\n2,2e6,7\n3,1e999,7.5\n", text=True)
+    cm = R.ColumnMap("t", "h", {"c": ("st_cfu", "CFU/mL"), "logc": ("st_cfu", "log10 CFU/mL")})
+    series, errors, warnings = R.validate(table, cm, list(obs.values()), lab.model)
+    assert not errors
+    assert all(np.isfinite(s.values).all() for s in series)
+    assert [len(s.values) for s in series] == [2, 3]
+    assert sum("skipped" in w for w in warnings) == 2
+
+
 def test_unsorted_times_are_sorted_with_a_warning():
     lab, obs = yog_obs()
     table = R.read_table("t,pH\n2,6.0\n0,6.6\n1,6.4\n", text=True)
@@ -138,6 +149,18 @@ def test_time_shift_is_detected_and_explained():
     text = " ".join(R.explain(m, obs["pH"], "h"))
     assert "EARLY" in text
     assert "متقدم" in " ".join(R.explain(m, obs["pH"], "h", ar=True))
+
+
+def test_time_shift_cannot_win_by_dropping_points():
+    """Every shift is scored on the same measurements: a flat prediction has no timing to correct."""
+    lab, obs = yog_obs()
+    tr = run(lab.model, lab.config({}))
+    t = tr.t[(tr.t > tr.t[0]) & (tr.t < tr.t[-1])][::max(1, len(tr.t) // 8)][:6]
+    meas = R.predicted_at(tr, obs["pH"], t)
+    meas[0] += 1.0                                                # one awkward early point
+    m, _ = R.compare(tr, obs["pH"], R.ObservedSeries("pH", "pH", "pH", t, meas))
+    # the shifted error is computed on all points, so it cannot drop to ~0 by excluding the outlier
+    assert m.rmse_shifted > 0.3
 
 
 def test_points_beyond_the_simulation_are_reported():

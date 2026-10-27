@@ -204,8 +204,9 @@ def calibrate(model, base_cfg: RunConfig, obs: list[R.Observable], series: list[
                 ci.append((None, None))
                 continue
             a, b = sol.x[k] - 1.96 * sd[k], sol.x[k] + 1.96 * sd[k]
-            ci.append((float(from_z(np.array([a]))[0] if use_log[k] else a),
-                       float(from_z(np.array([b]))[0] if use_log[k] else b)))
+            # back-transform with this parameter's own scale (not the whole mask)
+            ci.append((float(np.exp(a)) if use_log[k] else float(a),
+                       float(np.exp(b)) if use_log[k] else float(b)))
     except np.linalg.LinAlgError:
         warnings.append("The parameters cannot be estimated separately from these data (singular fit).")
         warnings_ar.append("لا يمكن تقدير المعاملات كلٌّ على حدة من هذه البيانات (مصفوفة منفردة).")

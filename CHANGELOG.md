@@ -21,7 +21,17 @@
 - **Corrections:** v0.5 called its B. subtilis screenshot "branched"; it was a compact disc. Branched colonies
   are not reproduced at this resolution (lobed edges at most; see docs/models/agar.md). Colonies are 3–5×
   larger than real colonies of the same age; the page now says so.
-- Tests: 207 (was 190): calibration 8, agar +8, calibration dialog construction 1.
+- **Fixes from an independent review (Codex adversarial review of the v0.5 branch):**
+  - Saving a comparison after changing the prediction, the CSV or the column mapping stored the OLD results
+    under the NEW inputs (false provenance). Results are now saved with a snapshot of their own inputs, and any
+    change clears them and disables Save until Compare is pressed again.
+  - Calibration intervals: with a linearly fitted parameter first (e.g. aS) and a log-scale one after it
+    (e.g. muL), the second parameter's 95 % interval was shown in log units. Each bound now uses its own scale.
+  - Time-shift diagnosis compared shifts on fewer points than the unshifted fit, so a shift could "win" by
+    pushing awkward measurements out of the comparison. Every shift is now scored on all measurements.
+  - CSV import accepted "inf"/"1e999" and crashed on log10 values ≥ 309 (overflow). Non-finite values are now
+    skipped with a warning like any other unusable cell.
+- Tests: 211 (was 190): calibration 9, agar +8, reality +2, UI +2.
 
 ## 0.5.0 — 2026-10-27 — Continuous microscope, Prediction vs Reality, Virtual Agar
 - **Fixed: organisms popped in and out.** Root cause: every scene used an immigration–death process. Drawn

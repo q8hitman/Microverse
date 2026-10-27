@@ -69,6 +69,21 @@ def test_inoculum_fit_also_changes_the_initial_state():
     assert res.parameters[0].value == pytest.approx(0.3, rel=1e-2)
 
 
+def test_intervals_use_each_parameter_own_scale():
+    """aS has lower bound 0 (fitted linearly); muL is fitted on a log scale. Both orders must give sane CIs."""
+    lab, cfg = yog_base()
+    truth = {"aS": 0.5, "muL": 0.8}
+    obs, series, *_ = synthetic(lab, cfg, truth)
+    for order in (["aS", "muL"], ["muL", "aS"]):
+        res = C.calibrate(lab.model, cfg, obs, series, order)
+        for p in res.parameters:
+            if p.ci_low is None:
+                continue
+            assert p.ci_low <= p.value <= p.ci_high, (order, p)
+            if p.symbol == "muL":
+                assert p.ci_low > 0, (order, p)
+
+
 def test_refuses_bad_requests():
     lab, cfg = yog_base()
     obs, series, *_ = synthetic(lab, cfg, {})

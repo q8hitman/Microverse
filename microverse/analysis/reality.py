@@ -144,9 +144,10 @@ def parse_number(s: str, decimal_comma: bool = False) -> float | None:
     if decimal_comma:
         s = s.replace(".", "").replace(",", ".")
     try:
-        return float(s)
+        x = float(s)
     except ValueError:
         return None
+    return x if math.isfinite(x) else None          # "inf", "1e999" are not measurements
 
 
 def parse_time(values: list[str], unit: str) -> tuple[np.ndarray, list[str]]:
@@ -233,7 +234,12 @@ def validate(table: Table, cmap: ColumnMap, obs: list[Observable], model) -> tup
             if x is None and v:
                 x = parse_number(v, decimal_comma=True)
             if x is not None:
-                x = 10 ** x if conv == "log10" else x * conv
+                if conv == "log10":
+                    x = 10 ** x if -300 < x < 300 else None      # beyond ±300 it overflows; no real count is there
+                else:
+                    x = x * conv
+            if x is not None and not math.isfinite(x):
+                x = None
             vals.append(np.nan if x is None else x)
         vals = np.array(vals, dtype=float)
         good = ok_t & ~np.isnan(vals)
@@ -295,14 +301,12 @@ def compare(traj: Trajectory, o: Observable, s: ObservedSeries) -> tuple[Metrics
     ss_tot = float(np.sum((oo - oo.mean()) ** 2))
     r2 = 1 - float(np.sum(res ** 2)) / ss_tot if (n >= 3 and ss_tot > 0) else None
     # timing: would the prediction fit better if it happened earlier or later?
+    # Every shift is scored on ALL n measurements (the curve is held at its end values outside the simulated span),
+    # so a shift can never look better just by pushing awkward points out of the comparison.
     span = traj.t[-1] - traj.t[0]
     best_shift, best = 0.0, rmse
     for sh in np.linspace(-0.25 * span, 0.25 * span, 101):
-        tt = t - sh
-        ok = (tt >= traj.t[0]) & (tt <= traj.t[-1])
-        if ok.sum() < max(2, n // 2):
-            continue
-        r = f(np.interp(tt[ok], traj.t, o.getter(traj))) - oo[ok]
+        r = f(np.interp(t - sh, traj.t, o.getter(traj))) - oo
         val = float(np.sqrt(np.mean(r ** 2)))
         if val < best - 1e-12:
             best, best_shift = val, float(sh)

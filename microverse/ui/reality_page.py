@@ -41,6 +41,7 @@ class RealityPage(QWidget):
         self.table = None
         self.obs = []
         self.results = []
+        self._snap = None           # (prediction, table, column map, lab, trajectory) the results came from
         self.var_rows: list[tuple[str, QComboBox, QComboBox]] = []
         root = QVBoxLayout(self)
         root.setContentsMargins(16, 12, 16, 12)
@@ -107,6 +108,9 @@ class RealityPage(QWidget):
         self.offset.setToolTip(L("If your first measurement was not taken at the simulation's time 0, enter when it was.",
                                  "إذا لم يكن أول قياس عند الزمن صفر في المحاكاة، أدخل متى كان."))
         self.map_form.addRow(L("First measurement at", "أول قياس عند"), self.offset)
+        self.time_col.currentIndexChanged.connect(self._invalidate)
+        self.time_unit.currentIndexChanged.connect(self._invalidate)
+        self.offset.valueChanged.connect(self._invalidate)
         lv.addWidget(g3)
         row2 = QHBoxLayout()
         self.btn_compare = QPushButton(L("4 · Compare", "٤ · قارن"))
@@ -157,6 +161,7 @@ class RealityPage(QWidget):
             self._pick_prediction()
 
     def _pick_prediction(self):
+        self._invalidate()
         if not self.rows:
             return
         pid = self.pred_combo.currentData()
@@ -232,7 +237,18 @@ class RealityPage(QWidget):
             if j >= 0:
                 var.setCurrentIndex(j)
 
+    def _invalidate(self, *_):
+        """Any input changed: the shown comparison no longer matches it, so it cannot be saved."""
+        if self.results:
+            self.results = []
+            self._snap = None
+            self.btn_save.setEnabled(False)
+            self.plots.clear()
+            self.report.setHtml("<i>" + L("Inputs changed. Press Compare again.",
+                                          "تغيّرت المدخلات. اضغط «قارن» مرة أخرى.") + "</i>")
+
     def _rebuild_mapping(self):
+        self._invalidate()
         while self.map_form.rowCount() > 2:
             self.map_form.removeRow(2)
         self.var_rows = []
@@ -259,6 +275,8 @@ class RealityPage(QWidget):
                     unit.addItem(u)
             var.currentIndexChanged.connect(fill_units)
             fill_units()
+            var.currentIndexChanged.connect(self._invalidate)
+            unit.currentIndexChanged.connect(self._invalidate)
             box = QHBoxLayout()
             box.addWidget(var, 1)
             box.addWidget(unit)
@@ -286,6 +304,7 @@ class RealityPage(QWidget):
         for s in series:
             m, pred = R.compare(self.traj, by_key[s.key], s)
             self.results.append((by_key[s.key], s, m, pred))
+        self._snap = (self.fp, self.table, cmap, self.lab, self.traj)
         self._plot()
         self._write(warnings)
         self.btn_save.setEnabled(True)
@@ -359,10 +378,11 @@ class RealityPage(QWidget):
                 self.pred_combo.setCurrentIndex(i)
 
     def _save(self):
-        if not self.results:
+        if not self.results or self._snap is None:
             return
+        fp, table, cmap, lab, traj = self._snap
         con = db.connect()
-        path = R.save_report(con, self.fp, self.table, self._cmap(), self.results, ROOT / "reports", self.lab, self.traj)
+        path = R.save_report(con, fp, table, cmap, self.results, ROOT / "reports", lab, traj)
         QMessageBox.information(self, L("Report saved", "حُفظ التقرير"),
                                 L(f"Saved:\n{path}\n\nThe measurements and this comparison were added to the database. "
                                   "The prediction itself was not changed.",
